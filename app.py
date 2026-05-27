@@ -135,7 +135,7 @@ fig = px.treemap(
         "#00FF00"
     ],
 
-    color_continuous_midpoint=50
+    color_continuous_midpoint=30
 )
 
 # =========================================================
