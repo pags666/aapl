@@ -104,7 +104,7 @@ fig = px.treemap(
     df,
 
     path=[
-        px.Constant("AAPALLA"),
+        px.Constant("AAPL"),
         "Hospital",
         "Department"
     ],
