@@ -197,7 +197,7 @@ fig.update_traces(
 
 fig.update_layout(
 
-    title="AAPAL Central Hospital Monitoring System",
+    title="AAPL Central Hospital Monitoring System",
 
     margin=dict(
         t=50,
@@ -215,7 +215,7 @@ fig.update_layout(
 # SHOW TREEMAP
 # =========================================================
 
-st.title("AAPAL Central Hospital Monitoring System")
+st.title("AAPL Central Hospital Monitoring System")
 
 st.plotly_chart(
     fig,
