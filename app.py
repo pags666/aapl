@@ -112,7 +112,7 @@ fig = px.treemap(
     values="Total Beds",
 
     color="Availability_Value",
-    range_color=(0, 100),
+    range_color=(0, 60),
 
     hover_data={
 
