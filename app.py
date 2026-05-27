@@ -230,7 +230,8 @@ st.title("AAPL Central Hospital Monitoring System")
 
 st.plotly_chart(
     fig,
-    use_container_width=True
+    use_container_width=True,
+    key="main_hospital_treemap"
 )
 
 # =========================================================
@@ -393,5 +394,6 @@ gm_fig.update_layout(
 
 st.plotly_chart(
     gm_fig,
-    use_container_width=True
+    use_container_width=True,
+    key="general_medicine_treemap"
 )
