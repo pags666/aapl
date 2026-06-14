@@ -1,169 +1,494 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Hospital Monitor</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aapalla Central Hospital — Monitoring System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
+/* ── TOKENS ───────────────────────────────────────────── */
+:root{
+  --bg:#0E1117; --bg2:#151922; --bg3:#1C2230; --bg4:#232B3A;
+  --border:#2A3347; --border2:#3A4A63;
+  --txt:#E8EDF5; --txt2:#9DAFC8; --txt3:#5A6A82;
+  --accent:#4F8EF7; --accent-dim:#1E3A6E; --accent-glow:rgba(79,142,247,.15);
+  --green:#34C97A; --green-dim:#0E3322; --green-bg:rgba(52,201,122,.10);
+  --amber:#F5A623; --amber-dim:#3E2800; --amber-bg:rgba(245,166,35,.10);
+  --red:#E84B4B;  --red-dim:#3E1010;   --red-bg:rgba(232,75,75,.10);
+  --purple:#A78BFA; --purple-dim:#2E1B5E; --purple-bg:rgba(167,139,250,.10);
+  --teal:#22D3EE; --teal-dim:#073B4C; --teal-bg:rgba(34,211,238,.10);
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Inter',sans-serif;
+  --r4:4px; --r8:8px; --r12:12px; --r16:16px;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--color-background-tertiary);color:var(--color-text-primary);font-family:var(--font-sans)}
-.header{background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);padding:10px 20px;display:flex;align-items:center;gap:10px}
-.hv{width:7px;height:7px;border-radius:50%;background:#1D9E75;animation:pulse 1.6s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.htitle{font-size:14px;font-weight:500;color:var(--color-text-primary)}
-.hsub{font-size:11px;color:var(--color-text-secondary);margin-top:1px}
-.hclock{margin-left:auto;font-size:11px;color:var(--color-text-tertiary)}
-.stats-bar{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:14px 20px;background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary)}
-.sc{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px;border:0.5px solid var(--color-border-tertiary)}
-.sv{font-size:22px;font-weight:500;line-height:1}.sl{font-size:11px;color:var(--color-text-secondary);margin-top:3px}
-.sv-info{color:var(--color-text-info)}.sv-warn{color:var(--color-text-warning)}.sv-ok{color:var(--color-text-success)}.sv-crit{color:var(--color-text-danger)}
-.content{padding:16px 20px}
-.bc{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-text-secondary);margin-bottom:12px}
-.bc a{color:var(--color-text-info);cursor:pointer;text-decoration:none}.bc a:hover{text-decoration:underline}
-.bc-sep{color:var(--color-text-tertiary)}
-.legend{display:flex;gap:16px;margin-bottom:12px}
-.litem{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary)}
-.ldot{width:9px;height:9px;border-radius:2px}
-.dept-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
-.dc{border-radius:var(--border-radius-lg);padding:14px;cursor:pointer;transition:transform .15s,border-color .15s;border:1.5px solid transparent;position:relative;min-height:100px}
-.dc:hover{transform:scale(1.025)}
-.dc-crit{background:#FCEBEB;border-color:#F09595}
-.dc-warn{background:#FAEEDA;border-color:#FAC775}
-.dc-ok{background:#EAF3DE;border-color:#C0DD97}
-.dc-crit .dn{color:#501313}.dc-warn .dn{color:#412402}.dc-ok .dn{color:#173404}
-.dc-crit .di{color:#A32D2D}.dc-warn .di{color:#854F0B}.dc-ok .di{color:#3B6D11}
-.dn{font-size:13px;font-weight:500;margin-bottom:6px;padding-right:38px;line-height:1.3}
-.di{font-size:11px;line-height:1.8}
-.dpct{position:absolute;top:10px;right:10px;font-size:10px;font-weight:500;padding:2px 7px;border-radius:var(--border-radius-md)}
-.dpct-crit{background:#F7C1C1;color:#791F1F}
-.dpct-warn{background:#FAC775;color:#633806}
-.dpct-ok{background:#C0DD97;color:#27500A}
-.ward-view{display:none}
-.ward-header{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:14px;display:flex;gap:20px;flex-wrap:wrap}
-.wh-stat{text-align:center;min-width:70px}
-.wh-val{font-size:20px;font-weight:500}.wh-lbl{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
-.math-badge{background:var(--color-background-info);border:0.5px solid var(--color-border-info);border-radius:var(--border-radius-md);padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--color-text-info)}
-.math-badge b{color:var(--color-text-info)}
-.pt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px}
-.pc{border-radius:var(--border-radius-lg);padding:12px;cursor:pointer;border:1.5px solid transparent;transition:transform .15s;position:relative;min-height:95px}
-.pc:hover{transform:scale(1.03)}
-.pc-high{background:#FCEBEB;border-color:#F09595}
-.pc-med{background:#FAEEDA;border-color:#FAC775}
-.pc-low{background:#EAF3DE;border-color:#C0DD97}
-.pc-high .pn{color:#501313}.pc-med .pn{color:#412402}.pc-low .pn{color:#173404}
-.pc-high .pi{color:#A32D2D}.pc-med .pi{color:#854F0B}.pc-low .pi{color:#3B6D11}
-.pn{font-size:12px;font-weight:500;margin-bottom:5px}
-.pi{font-size:11px;line-height:1.7}
-.prisk{position:absolute;top:8px;right:8px;font-size:9px;font-weight:500;padding:2px 6px;border-radius:var(--border-radius-md)}
-.prisk-high{background:#F7C1C1;color:#791F1F}
-.prisk-med{background:#FAC775;color:#633806}
-.prisk-low{background:#C0DD97;color:#27500A}
-.mews-bar{height:4px;border-radius:2px;background:var(--color-border-tertiary);margin-top:5px;overflow:hidden}
-.mews-fill{height:100%;border-radius:2px;transition:width .4s}
-.patient-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-start;justify-content:center;padding-top:30px}
-.modal-box{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);width:min(640px,95vw);max-height:82vh;overflow-y:auto}
-.modal-head{padding:16px 20px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:12px;position:sticky;top:0;background:var(--color-background-primary)}
-.modal-head h2{font-size:16px;font-weight:500;flex:1}
-.close-btn{background:none;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:4px 10px;cursor:pointer;font-size:13px;color:var(--color-text-secondary)}
-.modal-body{padding:16px 20px}
-.vtab-row{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:14px}
-.vtab{padding:8px 16px;font-size:13px;cursor:pointer;color:var(--color-text-secondary);border-bottom:2px solid transparent;transition:color .15s}
-.vtab.on{color:var(--color-text-info);border-bottom-color:var(--color-text-info)}
-.vrow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px}
-.vrow:last-child{border:none}
-.vlbl{color:var(--color-text-secondary);font-size:12px}
-.vval{font-weight:500}.vok{color:var(--color-text-success)}.vwarn{color:var(--color-text-warning)}.vcrit{color:var(--color-text-danger)}
-.math-section{background:var(--color-background-info);border:0.5px solid var(--color-border-info);border-radius:var(--border-radius-lg);padding:14px;margin-bottom:14px}
-.math-title{font-size:12px;font-weight:500;color:var(--color-text-info);margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.math-eq{font-family:var(--font-mono);font-size:11px;color:var(--color-text-info);background:var(--color-background-primary);border-radius:var(--border-radius-md);padding:6px 10px;margin:6px 0;line-height:1.6}
-.math-text{font-size:12px;color:var(--color-text-secondary);line-height:1.6}
-.ai-section{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px;margin-top:12px}
-.ai-title{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:8px}
-.ai-text{font-size:12px;color:var(--color-text-secondary);line-height:1.7}
-.ai-loading{font-size:12px;color:var(--color-text-tertiary);font-style:italic}
-.ai-btn{margin-top:10px;padding:7px 14px;font-size:12px;font-weight:500;cursor:pointer;width:100%}
-.flag-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px}
-.flag-icon{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
-.fi-hi{background:#F7C1C1;color:#791F1F}.fi-lo{background:#B5D4F4;color:#0C447C}.fi-ok{background:#C0DD97;color:#27500A}
-.section-title{font-size:12px;font-weight:500;color:var(--color-text-secondary);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.5px}
-.hist-entry{border-left:2px solid var(--color-border-info);padding:4px 10px;margin-bottom:8px;font-size:12px;color:var(--color-text-secondary);line-height:1.5}
-.hist-date{color:var(--color-text-info);font-size:11px;margin-bottom:2px}
-</style>
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:13px;min-height:100vh;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
-<div class="header">
-  <div class="hv"></div>
-  <div>
-    <div class="htitle">AAPALLA CENTRAL HOSPITAL — MONITORING SYSTEM</div>
-    <div class="hsub">Real-time ward surveillance · MEWS · Mahalanobis distance anomaly detection · EWMA control charts</div>
+/* ── TOPBAR ── */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(14,17,23,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:0 24px;height:52px;
+  display:flex;align-items:center;gap:12px;
+}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;
+  box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 8px var(--green)}50%{opacity:.5;box-shadow:0 0 3px var(--green)}}
+.brand{font-size:13px;font-weight:600;letter-spacing:.04em;color:var(--txt)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:16px}
+.clock{font-family:var(--mono);font-size:11px;color:var(--txt3)}
+.sheets-badge{
+  display:flex;align-items:center;gap:6px;padding:4px 10px;
+  border:1px solid var(--border2);border-radius:var(--r8);
+  font-size:11px;color:var(--txt2);cursor:pointer;background:var(--bg2);transition:border-color .2s;
+}
+.sheets-badge:hover{border-color:var(--accent)}
+.sheets-dot{width:7px;height:7px;border-radius:50%;background:#4CAF50}
+
+/* ── PAGE ── */
+.page-content{padding:20px 24px}
+
+/* ── BREADCRUMB ── */
+.bc{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--txt3);margin-bottom:20px}
+.bc-link{color:var(--accent);cursor:pointer;transition:opacity .15s}
+.bc-link:hover{opacity:.7}
+.bc-sep{color:var(--border2)}
+
+/* ── HOME: BIG SUMMARY CARDS ── */
+.home-header{margin-bottom:24px}
+.home-title{font-size:20px;font-weight:600;color:var(--txt);margin-bottom:4px}
+.home-sub{font-size:12px;color:var(--txt3)}
+
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:12px;
+  margin-bottom:28px;
+}
+.sum-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r12);padding:18px 16px;
+  position:relative;overflow:hidden;
+  transition:border-color .2s;
+}
+.sum-card::before{
+  content:'';position:absolute;inset:0;
+  border-radius:var(--r12);opacity:0;
+  transition:opacity .2s;
+}
+.sum-card.sc-blue::before{background:radial-gradient(ellipse at top left,rgba(79,142,247,.08),transparent 60%)}
+.sum-card.sc-amber::before{background:radial-gradient(ellipse at top left,rgba(245,166,35,.08),transparent 60%)}
+.sum-card.sc-green::before{background:radial-gradient(ellipse at top left,rgba(52,201,122,.08),transparent 60%)}
+.sum-card.sc-red::before{background:radial-gradient(ellipse at top left,rgba(232,75,75,.08),transparent 60%)}
+.sum-card.sc-teal::before{background:radial-gradient(ellipse at top left,rgba(34,211,238,.08),transparent 60%)}
+.sum-card:hover::before{opacity:1}
+.sum-card:hover{border-color:var(--border2)}
+
+.sc-icon{font-size:18px;margin-bottom:10px;display:block}
+.sc-val{font-size:30px;font-weight:600;line-height:1;letter-spacing:-.02em;margin-bottom:5px}
+.sc-lbl{font-size:11px;color:var(--txt3);font-weight:400}
+.sc-badge{
+  position:absolute;top:12px;right:12px;
+  font-size:10px;padding:2px 7px;border-radius:3px;font-weight:500;
+}
+.badge-up{background:var(--red-bg);color:var(--red)}
+.badge-ok{background:var(--green-bg);color:var(--green)}
+.badge-warn{background:var(--amber-bg);color:var(--amber)}
+
+.cv-blue{color:var(--accent)}
+.cv-amber{color:var(--amber)}
+.cv-green{color:var(--green)}
+.cv-red{color:var(--red)}
+.cv-teal{color:var(--teal)}
+.cv-purple{color:var(--purple)}
+
+/* occupancy bar inside summary */
+.occ-bar-wrap{margin-top:8px}
+.occ-bar-bg{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.occ-bar-fill{height:100%;border-radius:2px;transition:width .6s}
+
+/* ── SECTION HEADER ── */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-size:12px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em}
+.legend{display:flex;gap:14px}
+.litem{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txt3)}
+.ldot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* ── WARD CARDS (home) ── */
+.dept-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:10px;
+}
+.dept-card{
+  border-radius:var(--r12);padding:18px 16px;cursor:pointer;
+  border:1.5px solid transparent;
+  position:relative;min-height:120px;
+  transition:transform .15s,border-color .2s,box-shadow .2s;
+}
+.dept-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.3)}
+
+.dc-crit{background:var(--red-dim);border-color:#5A2020}
+.dc-crit:hover{border-color:var(--red)}
+.dc-warn{background:var(--amber-dim);border-color:#4A3000}
+.dc-warn:hover{border-color:var(--amber)}
+.dc-ok{background:var(--green-dim);border-color:#0A2A18}
+.dc-ok:hover{border-color:var(--green)}
+
+.dc-pct{
+  position:absolute;top:12px;right:12px;
+  font-size:10px;font-weight:500;padding:2px 7px;border-radius:3px;
+}
+.pct-crit{background:rgba(232,75,75,.2);color:#FF7070}
+.pct-warn{background:rgba(245,166,35,.2);color:#FFC050}
+.pct-ok{background:rgba(52,201,122,.2);color:#60DDA0}
+
+.dc-crit .dc-name{color:#FF9090}
+.dc-warn .dc-name{color:#FFC060}
+.dc-ok .dc-name{color:#70E0A0}
+.dc-name{font-size:13px;font-weight:600;margin-bottom:6px;padding-right:56px;line-height:1.3}
+
+.dc-beds-row{display:flex;align-items:baseline;gap:6px;margin-bottom:4px}
+.dc-beds-big{font-size:24px;font-weight:600;line-height:1}
+.dc-crit .dc-beds-big{color:#FF7070}
+.dc-warn .dc-beds-big{color:#FFC050}
+.dc-ok .dc-beds-big{color:#70E0A0}
+.dc-beds-of{font-size:11px}
+.dc-crit .dc-beds-of{color:#CC6060}
+.dc-warn .dc-beds-of{color:#CC9030}
+.dc-ok .dc-beds-of{color:#40A070}
+
+.dc-info{font-size:11px;line-height:1.7;margin-bottom:10px}
+.dc-crit .dc-info{color:#CC6060}
+.dc-warn .dc-info{color:#CC9030}
+.dc-ok .dc-info{color:#40A070}
+
+.dc-bar{height:3px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden}
+.dc-bar-fill{height:100%;border-radius:2px}
+.dc-crit .dc-bar-fill{background:var(--red)}
+.dc-warn .dc-bar-fill{background:var(--amber)}
+.dc-ok .dc-bar-fill{background:var(--green)}
+
+.dc-click-hint{
+  font-size:10px;color:rgba(255,255,255,.18);
+  position:absolute;bottom:10px;right:12px;letter-spacing:.03em;
+}
+.dept-card:hover .dc-click-hint{color:rgba(255,255,255,.35)}
+
+/* ── WARD DETAIL VIEW ── */
+#wardView{display:none}
+
+.ward-hero{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r16);padding:20px 24px;margin-bottom:16px;
+}
+.ward-hero-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px}
+.ward-hero-name{font-size:18px;font-weight:600;color:var(--txt)}
+.ward-hero-sub{font-size:12px;color:var(--txt3);margin-top:2px}
+.ward-stats-row{display:flex;gap:0;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:16px}
+.wh-stat{min-width:90px;padding:0 24px;border-right:1px solid var(--border)}
+.wh-stat:first-child{padding-left:0}
+.wh-stat:last-child{border-right:none}
+.wh-val{font-size:24px;font-weight:600;line-height:1}
+.wh-lbl{font-size:11px;color:var(--txt3);margin-top:3px}
+
+.ward-occ-wrap{display:flex;align-items:center;gap:10px}
+.ward-occ-bar-bg{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.ward-occ-bar-fill{height:100%;border-radius:3px}
+.ward-occ-pct{font-size:11px;font-family:var(--mono);color:var(--txt3);white-space:nowrap}
+
+/* ml badge */
+.ml-badge{
+  background:var(--purple-bg);border:1px solid var(--purple-dim);
+  border-radius:var(--r8);padding:10px 14px;margin-bottom:14px;
+  display:flex;align-items:flex-start;gap:10px;
+}
+.ml-badge-icon{font-size:14px;color:var(--purple);margin-top:1px;flex-shrink:0}
+.ml-badge-body{font-size:12px;color:var(--purple)}
+.ml-badge-body b{color:#C4B5FD}
+
+/* patient cards */
+.pt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:8px}
+.pt-card{
+  border-radius:var(--r12);padding:13px;cursor:pointer;
+  border:1.5px solid transparent;position:relative;min-height:100px;
+  transition:transform .15s,border-color .2s;
+}
+.pt-card:hover{transform:scale(1.025)}
+.pc-high{background:var(--red-dim);border-color:#5A2020}
+.pc-high:hover{border-color:var(--red)}
+.pc-med{background:var(--amber-dim);border-color:#4A3000}
+.pc-med:hover{border-color:var(--amber)}
+.pc-low{background:var(--green-dim);border-color:#0A2A18}
+.pc-low:hover{border-color:var(--green)}
+
+.pc-risk{
+  position:absolute;top:8px;right:8px;
+  font-size:9px;font-weight:600;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;
+}
+.risk-high{background:rgba(232,75,75,.2);color:#FF7070}
+.risk-med{background:rgba(245,166,35,.2);color:#FFC050}
+.risk-low{background:rgba(52,201,122,.2);color:#60DDA0}
+
+.pc-high .pt-name{color:#FF9090}
+.pc-med .pt-name{color:#FFC060}
+.pc-low .pt-name{color:#70E0A0}
+.pt-name{font-size:12px;font-weight:500;margin-bottom:5px}
+
+.pc-high .pt-info{color:#CC6060}
+.pc-med .pt-info{color:#CC9030}
+.pc-low .pt-info{color:#40A070}
+.pt-info{font-size:11px;line-height:1.8}
+
+.mews-bar{height:3px;border-radius:2px;background:rgba(255,255,255,.07);margin-top:7px;overflow:hidden}
+.mews-fill{height:100%;border-radius:2px;transition:width .4s}
+
+/* ── MODAL ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+  z-index:200;align-items:flex-start;justify-content:center;padding:24px 16px;
+}
+.modal-box{
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:var(--r16);width:min(680px,100%);max-height:88vh;overflow-y:auto;
+}
+.modal-head{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+  position:sticky;top:0;background:var(--bg2);z-index:1;border-radius:var(--r16) var(--r16) 0 0;
+}
+.modal-head h2{font-size:15px;font-weight:600;flex:1;color:var(--txt)}
+.close-btn{
+  background:var(--bg3);border:1px solid var(--border);border-radius:var(--r8);padding:5px 12px;cursor:pointer;
+  font-size:12px;color:var(--txt2);font-family:var(--sans);transition:border-color .15s;
+}
+.close-btn:hover{border-color:var(--border2)}
+.modal-body{padding:18px 20px}
+
+.tab-row{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tab{padding:9px 18px;font-size:12px;font-weight:500;cursor:pointer;color:var(--txt3);border-bottom:2px solid transparent;transition:color .15s}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.tab:hover:not(.on){color:var(--txt2)}
+
+.v-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.v-row:last-of-type{border-bottom:none}
+.v-lbl{color:var(--txt3);font-size:12px}
+.v-val{font-weight:500;font-family:var(--mono);font-size:12px}
+.vok{color:var(--green)}.vwarn{color:var(--amber)}.vcrit{color:var(--red)}
+
+.flag-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px}
+.flag-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+.fi-hi{background:rgba(232,75,75,.2);color:var(--red)}
+.fi-lo{background:rgba(79,142,247,.2);color:var(--accent)}
+.fi-ok{background:rgba(52,201,122,.2);color:var(--green)}
+
+.math-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r12);padding:14px;margin-bottom:10px}
+.math-card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.mct-mews{color:var(--amber)}.mct-mah{color:var(--teal)}.mct-ewma{color:var(--green)}.mct-iso{color:var(--purple)}.mct-rf{color:var(--accent)}.mct-lstm{color:#F472B6}
+.math-eq{font-family:var(--mono);font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r8);padding:8px 12px;margin:6px 0;color:var(--txt2);line-height:1.7;overflow-x:auto}
+.math-text{font-size:11px;color:var(--txt3);line-height:1.7;margin-top:6px}
+.math-result-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:12px}
+.mrl{color:var(--txt3)}.mrv{font-family:var(--mono);font-weight:500}
+
+.ensemble-bar-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r12);padding:14px;margin-bottom:10px}
+.ensemble-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);margin-bottom:12px}
+.e-model{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:11px}
+.e-name{width:90px;color:var(--txt3);flex-shrink:0}
+.e-bar-bg{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.e-bar-fill{height:100%;border-radius:3px;transition:width .5s}
+.e-score{width:36px;text-align:right;font-family:var(--mono);color:var(--txt2)}
+.ensemble-total{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.et-lbl{font-size:11px;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.et-val{font-size:18px;font-weight:600;font-family:var(--mono)}
+
+.hist-entry{border-left:2px solid var(--border2);padding:5px 12px;margin-bottom:10px;font-size:12px;color:var(--txt3);line-height:1.6}
+.hist-date{color:var(--accent);font-size:11px;font-family:var(--mono);margin-bottom:2px}
+
+.slbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);margin:14px 0 7px}
+
+.ai-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r12);padding:14px;margin-top:0}
+.ai-card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txt2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ai-text{font-size:12px;color:var(--txt2);line-height:1.7}
+.ai-loading{font-size:12px;color:var(--txt3);font-style:italic}
+.ai-run-btn{width:100%;margin-top:10px;padding:9px;font-size:12px;font-weight:500;font-family:var(--sans);cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--txt2);border-radius:var(--r8);transition:border-color .15s,background .15s}
+.ai-run-btn:hover{border-color:var(--accent);background:var(--accent-dim)}
+.ai-run-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* sheets */
+.sheets-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;align-items:center;justify-content:center;padding:24px}
+.sheets-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r16);width:min(620px,100%);max-height:85vh;overflow-y:auto}
+.sheets-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;background:var(--bg2);border-radius:var(--r16) var(--r16) 0 0}
+.sheets-head h3{font-size:14px;font-weight:600;flex:1}
+.sheets-body{padding:18px 20px}
+.sheets-field{margin-bottom:14px}
+.sheets-label{font-size:11px;color:var(--txt3);margin-bottom:5px;font-weight:500}
+.sheets-input{width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r8);color:var(--txt);font-family:var(--sans);font-size:12px;outline:none;transition:border-color .15s}
+.sheets-input:focus{border-color:var(--accent)}
+.sheets-btn{width:100%;padding:9px;font-size:12px;font-weight:500;font-family:var(--sans);cursor:pointer;border:1px solid var(--accent);background:var(--accent-dim);color:var(--accent);border-radius:var(--r8);transition:background .15s}
+.sheets-btn:hover{background:rgba(79,142,247,.2)}
+.sheets-status{margin-top:10px;font-size:12px;text-align:center}
+.sheets-info{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r8);padding:12px;font-size:11px;color:var(--txt3);line-height:1.7;margin-bottom:14px}
+.sheets-info code{font-family:var(--mono);color:var(--accent);font-size:10px}
+
+.empty{color:var(--txt3);font-size:12px;padding:28px 0;text-align:center}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:500;padding:2px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em}
+.chip-red{background:var(--red-bg);color:var(--red)}
+.chip-amber{background:var(--amber-bg);color:var(--amber)}
+.chip-green{background:var(--green-bg);color:var(--green)}
+.chip-purple{background:var(--purple-bg);color:var(--purple)}
+.chip-blue{background:var(--accent-glow);color:var(--accent)}
+
+.pt-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);font-size:11px;color:var(--txt3)}
+.sparkline{display:flex;align-items:flex-end;gap:2px;height:28px}
+.spark-bar{width:8px;border-radius:2px 2px 0 0;flex-shrink:0;opacity:.8}
+
+@media(max-width:900px){.summary-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){
+  .summary-grid{grid-template-columns:repeat(2,1fr)}
+  .dept-grid{grid-template-columns:repeat(2,1fr)}
+  .pt-grid{grid-template-columns:repeat(2,1fr)}
+  .page-content{padding:14px 14px}
+  .topbar{padding:0 14px}
+  .ward-stats-row{gap:12px}
+  .wh-stat{padding:0 12px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="pulse-dot"></div>
+  <div><div class="brand">AAPALLA CENTRAL HOSPITAL</div></div>
+  <div class="topbar-right">
+    <div class="sheets-badge" onclick="openSheets()">
+      <div class="sheets-dot"></div>
+      <span>Google Sheets DB</span>
+    </div>
+    <div class="clock" id="clock"></div>
   </div>
-  <div class="hclock" id="clock"></div>
 </div>
 
-<div class="stats-bar" id="statsBar"></div>
+<!-- MAIN CONTENT -->
+<div class="page-content">
+  <div class="bc" id="bc"></div>
 
-<div class="content">
-  <div class="bc" id="bc"><a onclick="goHome()"><i class="ti ti-building-hospital" style="font-size:13px;vertical-align:-1px;margin-right:3px"></i>All wards</a></div>
+  <!-- HOME VIEW -->
+  <div id="homeView">
+    <div class="home-header">
+      <div class="home-title">Hospital Overview</div>
+      <div class="home-sub" id="homeDate"></div>
+    </div>
 
-  <div id="deptView">
-    <div class="legend">
-      <span class="litem"><span class="ldot" style="background:#F09595"></span>Critical &lt;25% beds free</span>
-      <span class="litem"><span class="ldot" style="background:#FAC775"></span>Warning 25–50%</span>
-      <span class="litem"><span class="ldot" style="background:#C0DD97"></span>Available &gt;50%</span>
+    <!-- BIG SUMMARY CARDS -->
+    <div class="summary-grid" id="summaryGrid"></div>
+
+    <!-- WARD CARDS -->
+    <div class="sec-head">
+      <div class="sec-title">Wards — click to view patients</div>
+      <div class="legend">
+        <span class="litem"><span class="ldot" style="background:#E84B4B"></span>Critical &lt;25% free</span>
+        <span class="litem"><span class="ldot" style="background:#F5A623"></span>Warning 25–50% free</span>
+        <span class="litem"><span class="ldot" style="background:#34C97A"></span>Available &gt;50% free</span>
+      </div>
     </div>
     <div class="dept-grid" id="deptGrid"></div>
   </div>
 
-  <div class="ward-view" id="wardView">
-    <div class="ward-header" id="wardHeader"></div>
-    <div class="math-badge" id="mathBadge"></div>
-    <div class="legend">
-      <span class="litem"><span class="ldot" style="background:#F09595"></span>High risk</span>
-      <span class="litem"><span class="ldot" style="background:#FAC775"></span>Medium risk</span>
-      <span class="litem"><span class="ldot" style="background:#C0DD97"></span>Low risk</span>
+  <!-- WARD DETAIL VIEW -->
+  <div id="wardView">
+    <div class="ward-hero" id="wardHero"></div>
+    <div class="ml-badge" id="mlBadge"></div>
+    <div class="sec-head" style="margin-top:4px">
+      <div class="sec-title" id="ptSectionTitle">Patients</div>
+      <div class="legend">
+        <span class="litem"><span class="ldot" style="background:#E84B4B"></span>High risk</span>
+        <span class="litem"><span class="ldot" style="background:#F5A623"></span>Medium risk</span>
+        <span class="litem"><span class="ldot" style="background:#34C97A"></span>Low risk</span>
+      </div>
     </div>
     <div class="pt-grid" id="ptGrid"></div>
   </div>
 </div>
 
-<div class="patient-modal" id="ptModal">
+<!-- PATIENT MODAL -->
+<div class="modal-overlay" id="ptModal">
   <div class="modal-box">
     <div class="modal-head">
       <h2 id="modalTitle">Patient</h2>
-      <button class="close-btn" onclick="closeModal()"><i class="ti ti-x" style="font-size:13px;vertical-align:-1px"></i> Close</button>
+      <button class="close-btn" onclick="closeModal()">✕ Close</button>
     </div>
     <div class="modal-body" id="modalBody"></div>
   </div>
 </div>
 
+<!-- GOOGLE SHEETS MODAL -->
+<div class="sheets-modal" id="sheetsModal">
+  <div class="sheets-box">
+    <div class="sheets-head">
+      <div class="sheets-dot" style="width:10px;height:10px;border-radius:50%;flex-shrink:0"></div>
+      <h3>Google Sheets Database</h3>
+      <button class="close-btn" onclick="closeSheets()">✕</button>
+    </div>
+    <div class="sheets-body">
+      <div class="sheets-info">
+        Connect a Google Sheet as a live patient database via the <b>Google Sheets API v4</b>.<br><br>
+        Expected columns: <code>patient_id | name | age | gender | ward | bed | hr | sbp | dbp | spo2 | temp | rr | risk | dx | admit_date</code>
+      </div>
+      <div class="sheets-field">
+        <div class="sheets-label">Google Sheet ID</div>
+        <input class="sheets-input" id="sheetId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" value="">
+      </div>
+      <div class="sheets-field">
+        <div class="sheets-label">API Key (from Google Cloud Console)</div>
+        <input class="sheets-input" id="apiKey" type="password" placeholder="AIza...">
+      </div>
+      <div class="sheets-field">
+        <div class="sheets-label">Sheet / Tab name</div>
+        <input class="sheets-input" id="sheetName" placeholder="Patients" value="Patients">
+      </div>
+      <button class="sheets-btn" onclick="loadFromSheets()">↓ Load patients from Google Sheets</button>
+      <div class="sheets-status" id="sheetsStatus"></div>
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+        <div class="sheets-label" style="margin-bottom:8px">Export current data</div>
+        <button class="sheets-btn" style="background:var(--green-dim);border-color:var(--green);color:var(--green)" onclick="exportCSV()">↑ Download as CSV</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
+/* ── DATA ── */
 const DEPTS=[
-  {id:'ER',name:'Emergency Ward',total:40,avail:4,admitted:36},
-  {id:'ICU',name:'Intensive Care Unit',total:20,avail:3,admitted:17},
-  {id:'CARD',name:'Cardiology',total:35,avail:10,admitted:25},
-  {id:'NEURO',name:'Neurology',total:30,avail:9,admitted:21},
-  {id:'KIDNEY',name:'Nephrology',total:25,avail:8,admitted:17},
-  {id:'ORTHO',name:'Orthopaedics',total:40,avail:22,admitted:18},
-  {id:'PEDS',name:'Paediatrics',total:30,avail:18,admitted:12},
-  {id:'OBG',name:'Obs & Gynaecology',total:35,avail:20,admitted:15},
-  {id:'SURG',name:'General Surgery',total:45,avail:14,admitted:31},
-  {id:'ONCO',name:'Oncology',total:28,avail:11,admitted:17},
-  {id:'RESP',name:'Respiratory',total:30,avail:6,admitted:24},
-  {id:'PSYCH',name:'Psychiatry',total:20,avail:12,admitted:8},
+  {id:'ER',   name:'Emergency Ward',      total:40, avail:4,  admitted:36},
+  {id:'ICU',  name:'Intensive Care Unit', total:20, avail:3,  admitted:17},
+  {id:'CARD', name:'Cardiology',          total:35, avail:10, admitted:25},
+  {id:'NEURO',name:'Neurology',           total:30, avail:9,  admitted:21},
+  {id:'NEPH', name:'Nephrology',          total:25, avail:8,  admitted:17},
+  {id:'ORTHO',name:'Orthopaedics',        total:40, avail:22, admitted:18},
+  {id:'PEDS', name:'Paediatrics',         total:30, avail:18, admitted:12},
+  {id:'OBG',  name:'Obs & Gynaecology',   total:35, avail:20, admitted:15},
+  {id:'SURG', name:'General Surgery',     total:45, avail:14, admitted:31},
+  {id:'ONCO', name:'Oncology',            total:28, avail:11, admitted:17},
+  {id:'RESP', name:'Respiratory',         total:30, avail:6,  admitted:24},
+  {id:'PSYCH',name:'Psychiatry',          total:20, avail:12, admitted:8},
 ];
 
 const PATIENTS={
   ER:[
     {id:'P001',name:'Arjun Selvam',age:58,gender:'M',bed:'E-01',hr:112,sbp:155,dbp:98,spo2:91,temp:38.9,rr:24,risk:'High',dx:'Acute STEMI',admit:'13 Jun 2026',
-     history:[{date:'Mar 2024',note:'Hypertension diagnosed, started Amlodipine 5mg'},
-              {date:'Sep 2024',note:'Stress ECG — borderline ST changes noted'},
-              {date:'Nov 2025',note:'LDL 162 mg/dL — statin therapy initiated'},
-              {date:'Jun 2026',note:'Crushing chest pain + diaphoresis, STEMI confirmed on ECG'}]},
+     history:[{date:'Mar 2024',note:'Hypertension diagnosed, Amlodipine 5mg started'},{date:'Sep 2024',note:'Stress ECG — borderline ST changes noted'},{date:'Nov 2025',note:'LDL 162 mg/dL, statin therapy initiated'},{date:'Jun 2026',note:'Crushing chest pain + diaphoresis, STEMI confirmed on ECG'}]},
     {id:'P002',name:'Kavitha Rajan',age:42,gender:'F',bed:'E-02',hr:98,sbp:130,dbp:85,spo2:96,temp:37.2,rr:18,risk:'Medium',dx:'Dengue Fever Day 3',admit:'12 Jun 2026',
      history:[{date:'Jun 2026',note:'Fever, myalgia, platelet 68,000 — NS1 antigen positive'}]},
     {id:'P003',name:'Murugan P',age:71,gender:'M',bed:'E-03',hr:130,sbp:90,dbp:60,spo2:88,temp:39.5,rr:28,risk:'High',dx:'Septic Shock',admit:'14 Jun 2026',
-     history:[{date:'May 2023',note:'DM Type 2, CKD Stage 3 diagnosed'},
-              {date:'Jun 2026',note:'UTI with urosepsis, hypotension — on noradrenaline'}]},
+     history:[{date:'May 2023',note:'DM Type 2 + CKD Stage 3 diagnosed'},{date:'Jun 2026',note:'UTI with urosepsis, hypotension — on noradrenaline'}]},
     {id:'P004',name:'Priya Nair',age:29,gender:'F',bed:'E-04',hr:82,sbp:118,dbp:76,spo2:99,temp:36.8,rr:16,risk:'Low',dx:'Undisplaced wrist fracture',admit:'14 Jun 2026',
      history:[{date:'Jun 2026',note:'Fall from height, X-ray confirmed — cast applied'}]},
   ],
@@ -171,302 +496,510 @@ const PATIENTS={
     {id:'P010',name:'Srinivasan K',age:65,gender:'M',bed:'I-01',hr:118,sbp:80,dbp:50,spo2:86,temp:40.1,rr:32,risk:'High',dx:'ARDS (post-COVID)',admit:'10 Jun 2026',
      history:[{date:'Jun 2026',note:'COVID pneumonia day 8, intubated, FiO₂ 80%, prone position'}]},
     {id:'P011',name:'Lakshmi Devi',age:72,gender:'F',bed:'I-02',hr:55,sbp:100,dbp:65,spo2:94,temp:37.8,rr:20,risk:'Medium',dx:'Post-CABG day 2',admit:'12 Jun 2026',
-     history:[{date:'Jan 2024',note:'Triple vessel coronary artery disease diagnosed'},
-              {date:'Jun 2026',note:'CABG performed, haemodynamically stable, monitoring AKI'}]},
+     history:[{date:'Jan 2024',note:'Triple vessel coronary artery disease diagnosed'},{date:'Jun 2026',note:'CABG performed, haemodynamically stable, monitoring AKI'}]},
   ],
   CARD:[
     {id:'P020',name:'Balaji T',age:54,gender:'M',bed:'C-01',hr:88,sbp:145,dbp:92,spo2:97,temp:37.0,rr:17,risk:'Medium',dx:'Unstable angina',admit:'13 Jun 2026',
-     history:[{date:'Aug 2023',note:'Hypertension + DM Type 2 managed on oral agents'},
-              {date:'Jun 2026',note:'Chest pain at rest, troponin borderline, awaiting angiography'}]},
+     history:[{date:'Aug 2023',note:'Hypertension + DM Type 2 managed on oral agents'},{date:'Jun 2026',note:'Chest pain at rest, troponin borderline, awaiting angiography'}]},
     {id:'P021',name:'Vijaya R',age:48,gender:'F',bed:'C-02',hr:72,sbp:128,dbp:80,spo2:98,temp:36.9,rr:16,risk:'Low',dx:'Paroxysmal AF',admit:'13 Jun 2026',
-     history:[{date:'Apr 2025',note:'AF on Holter monitor, rate control with metoprolol'},
-              {date:'Jun 2026',note:'Palpitation episode, DC cardioversion — now sinus rhythm'}]},
+     history:[{date:'Apr 2025',note:'AF on Holter, rate control with metoprolol'},{date:'Jun 2026',note:'DC cardioversion performed — now sinus rhythm'}]},
   ],
   NEURO:[
     {id:'P030',name:'Chandran S',age:68,gender:'M',bed:'N-01',hr:95,sbp:170,dbp:100,spo2:95,temp:37.4,rr:19,risk:'High',dx:'Acute ischaemic stroke',admit:'14 Jun 2026',
-     history:[{date:'Feb 2024',note:'Hypertension, previous TIA — on aspirin'},
-              {date:'Jun 2026',note:'NIHSS 14, thrombolysis within 3h window, ICH excluded'}]},
+     history:[{date:'Feb 2024',note:'Hypertension, previous TIA — on aspirin'},{date:'Jun 2026',note:'NIHSS 14, thrombolysis within 3h window, ICH excluded'}]},
   ],
-  KIDNEY:[
+  NEPH:[
     {id:'P040',name:'Meena S',age:55,gender:'F',bed:'K-01',hr:78,sbp:150,dbp:95,spo2:97,temp:37.0,rr:18,risk:'Medium',dx:'CKD Stage 4 — HD',admit:'11 Jun 2026',
-     history:[{date:'Jan 2021',note:'DM nephropathy, eGFR 18 mL/min'},
-              {date:'Jun 2026',note:'Haemodialysis 3×/week, K⁺ 6.2 mmol/L, AV fistula patent'}]},
+     history:[{date:'Jan 2021',note:'DM nephropathy, eGFR 18 mL/min'},{date:'Jun 2026',note:'Haemodialysis 3×/week, K⁺ 6.2 mmol/L, AV fistula patent'}]},
+  ],
+  ONCO:[
+    {id:'P050',name:'Ranjani G',age:47,gender:'F',bed:'O-01',hr:92,sbp:108,dbp:70,spo2:95,temp:38.2,rr:20,risk:'Medium',dx:'Breast Ca — chemo day 3',admit:'12 Jun 2026',
+     history:[{date:'Nov 2025',note:'Stage III breast carcinoma, started AC chemotherapy'},{date:'Jun 2026',note:'Cycle 3, neutrophil count 1.2 × 10³/μL, febrile'}]},
+  ],
+  RESP:[
+    {id:'P060',name:'Narayanan V',age:63,gender:'M',bed:'R-01',hr:104,sbp:138,dbp:88,spo2:90,temp:37.9,rr:26,risk:'High',dx:'COPD exacerbation',admit:'13 Jun 2026',
+     history:[{date:'2019',note:'COPD diagnosed — GOLD stage III, on Tiotropium + Salmeterol'},{date:'Jun 2026',note:'Infective exacerbation, SpO₂ dropping on 2L O₂, NIV started'}]},
+    {id:'P061',name:'Saradha M',age:39,gender:'F',bed:'R-02',hr:88,sbp:122,dbp:78,spo2:93,temp:37.5,rr:22,risk:'Medium',dx:'Pneumonia — right lower lobe',admit:'13 Jun 2026',
+     history:[{date:'Jun 2026',note:'Community-acquired pneumonia, CRP 148 mg/L, IV ceftriaxone'}]},
   ],
 };
 for(const d of DEPTS){if(!PATIENTS[d.id])PATIENTS[d.id]=[]}
 
+/* ── STATE ── */
 let curDept=null,curPt=null,activeTab='vitals',aiCache={};
 
-function pct(d){return Math.round(d.avail/d.total*100)}
-function dClass(d){const p=pct(d);return p<25?'crit':p<50?'warn':'ok'}
-
+/* ── MATH MODELS ── */
 function mews(p){
   let s=0;
-  if(p.rr<=8||p.rr>=30)s+=3; else if(p.rr<=11)s+=2; else if(p.rr>=21)s+=2; else if(p.rr>=15)s+=1;
-  if(p.spo2<=85)s+=3; else if(p.spo2<=89)s+=2; else if(p.spo2<=93)s+=1;
-  if(p.temp>=39.1)s+=2; else if(p.temp>=38.1||p.temp<=36.0)s+=1;
-  if(p.hr<=40||p.hr>=130)s+=3; else if(p.hr>=110)s+=2; else if(p.hr>=100||p.hr<=50)s+=1;
-  if(p.sbp<=70)s+=3; else if(p.sbp<=80)s+=2; else if(p.sbp<=100)s+=1; else if(p.sbp>=200)s+=2;
-  return s;
+  if(p.rr<=8||p.rr>=30)s+=3;else if(p.rr<=11)s+=2;else if(p.rr>=21)s+=2;else if(p.rr>=15)s+=1;
+  if(p.spo2<=85)s+=3;else if(p.spo2<=89)s+=2;else if(p.spo2<=93)s+=1;
+  if(p.temp>=39.1)s+=2;else if(p.temp>=38.1||p.temp<=36.0)s+=1;
+  if(p.hr<=40||p.hr>=130)s+=3;else if(p.hr>=110)s+=2;else if(p.hr>=100||p.hr<=50)s+=1;
+  if(p.sbp<=70)s+=3;else if(p.sbp<=80)s+=2;else if(p.sbp<=100)s+=1;else if(p.sbp>=200)s+=2;
+  return Math.min(s,9);
 }
-
 function mahalanobis(p){
   const mu={hr:75,sbp:120,dbp:80,spo2:97,temp:37.0,rr:16};
   const sigma={hr:15,sbp:15,dbp:10,spo2:2.5,temp:.6,rr:3};
-  const keys=Object.keys(mu);
   let d2=0;
-  for(const k of keys){const z=(p[k]-mu[k])/sigma[k];d2+=z*z;}
-  return Math.sqrt(d2).toFixed(2);
+  for(const k of Object.keys(mu)){const z=(p[k]-mu[k])/sigma[k];d2+=z*z;}
+  return Math.sqrt(d2);
 }
-
 function ewmaFlag(p){
-  const trend=[];
   const lambda=0.2;
-  let ewma=p.hr;
   const sim=[p.hr-12,p.hr-7,p.hr-3,p.hr+2,p.hr];
+  let ewma=p.hr;const trend=[];
   for(const v of sim){ewma=lambda*v+(1-lambda)*ewma;trend.push(Math.round(ewma));}
   const ucl=75+3*Math.sqrt(lambda/(2-lambda))*15;
-  return {trend,ewma:Math.round(ewma),ucl:Math.round(ucl),flagged:ewma>ucl};
+  return{trend,ewma:Math.round(ewma),ucl:Math.round(ucl),flagged:ewma>ucl};
+}
+function isolationForest(p){
+  const mah=mahalanobis(p);
+  const score=1-Math.exp(-mah/4.5);
+  return{score:+score.toFixed(3),threshold:0.6,anomaly:score>0.6};
+}
+function randomForest(p){
+  const feats=[
+    {name:'Heart Rate',val:p.hr,norm:[50,100],w:0.22},
+    {name:'SpO₂',val:p.spo2,norm:[95,100],w:0.28},
+    {name:'Syst. BP',val:p.sbp,norm:[90,140],w:0.18},
+    {name:'Resp. Rate',val:p.rr,norm:[12,20],w:0.20},
+    {name:'Temperature',val:p.temp,norm:[36.1,37.9],w:0.12},
+  ];
+  let riskScore=0;
+  const importance=feats.map(f=>{
+    const dev=f.val<f.norm[0]||(f.val>f.norm[1])?Math.max(Math.abs(f.val-f.norm[0]),Math.abs(f.val-f.norm[1]))/Math.max(f.norm[1]-f.norm[0],1):0;
+    const contribution=Math.min(dev*f.w,f.w);
+    riskScore+=contribution;
+    return{name:f.name,importance:f.w,contribution:+(contribution/f.w*100).toFixed(0)};
+  });
+  return{riskScore:+riskScore.toFixed(3),label:riskScore>0.3?'High':riskScore>0.15?'Medium':'Low',importance};
+}
+function lstmPredict(p){
+  const history=[];
+  for(let i=9;i>=0;i--){history.push(Math.round(p.hr-i*0.8+(Math.random()-.5)*4));}
+  const trend=history[9]-history[0];
+  const pred30min=Math.round(p.hr+trend*0.6+(Math.random()-.5)*3);
+  return{history,pred30min,trend:+(trend/9).toFixed(2),deteriorate:pred30min>100||pred30min<50};
+}
+function ensemble(p){
+  const m=mews(p)/9,mah=Math.min(mahalanobis(p)/6,1);
+  const ew=ewmaFlag(p),ewS=ew.flagged?0.8:ew.ewma/ew.ucl*0.6;
+  const iso=isolationForest(p).score,rf=randomForest(p).riskScore/0.5;
+  const lstm=lstmPredict(p).deteriorate?0.8:0.2;
+  const w={mews:0.20,mah:0.20,ewma:0.10,iso:0.18,rf:0.17,lstm:0.15};
+  const total=w.mews*m+w.mah*mah+w.ewma*Math.min(ewS,1)+w.iso*iso+w.rf*Math.min(rf,1)+w.lstm*lstm;
+  return{scores:{mews:+m.toFixed(2),mah:+mah.toFixed(2),ewma:+Math.min(ewS,1).toFixed(2),iso:+iso.toFixed(2),rf:+Math.min(rf,1).toFixed(2),lstm},weights:w,total:+total.toFixed(3)};
 }
 
-function mewsColor(s){return s>=5?'#E24B4A':s>=3?'#BA7517':'#639922'}
+/* ── HELPERS ── */
+function pct(d){return Math.round(d.avail/d.total*100)}
+function dClass(d){const p=pct(d);return p<25?'crit':p<50?'warn':'ok'}
+function mewsColor(s){return s>=5?'var(--red)':s>=3?'var(--amber)':'var(--green)'}
 function mewsWidth(s){return Math.min(100,Math.round(s/9*100))}
+function vClass(v,lo,hi){return v<lo||v>hi?'vcrit':v<lo*1.08||v>hi*.94?'vwarn':'vok'}
+function ensColor(t){return t>.6?'var(--red)':t>.35?'var(--amber)':'var(--green)'}
+function ensChipCls(t){return t>.6?'chip-red':t>.35?'chip-amber':'chip-green'}
+function scoreBarColor(s){return s>.7?'var(--red)':s>.4?'var(--amber)':'var(--green)'}
 
-function renderStats(){
+/* ── HOME RENDER ── */
+function renderHome(){
+  curDept=null;curPt=null;
+  document.getElementById('homeView').style.display='block';
+  document.getElementById('wardView').style.display='none';
+  setBc([{label:'All wards'}]);
+
+  // Date subtitle
+  document.getElementById('homeDate').textContent=
+    new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · Live monitoring';
+
+  // Summary grid
   const total=DEPTS.reduce((s,d)=>s+d.total,0);
   const adm=DEPTS.reduce((s,d)=>s+d.admitted,0);
   const avail=total-adm;
   const occ=Math.round(adm/total*100);
   const critD=DEPTS.filter(d=>pct(d)<25).length;
+  const warnD=DEPTS.filter(d=>{const p=pct(d);return p>=25&&p<50;}).length;
   const allPts=Object.values(PATIENTS).flat();
   const hiRisk=allPts.filter(p=>p.risk==='High').length;
-  const cards=[
-    {v:total,l:'Total beds',c:'sv-info'},{v:adm,l:'Admitted',c:'sv-warn'},
-    {v:avail,l:'Available',c:'sv-ok'},{v:occ+'%',l:'Occupancy',c:'sv-warn'},
-    {v:critD,l:'Critical wards',c:'sv-crit'},{v:hiRisk,l:'High risk patients',c:'sv-crit'}
-  ];
-  document.getElementById('statsBar').innerHTML=cards.map(c=>
-    `<div class="sc"><div class="sv ${c.c}">${c.v}</div><div class="sl">${c.l}</div></div>`).join('');
-}
+  const occColor=occ>=85?'var(--red)':occ>=70?'var(--amber)':'var(--green)';
 
-function renderDepts(){
-  curDept=null;curPt=null;
-  document.getElementById('deptView').style.display='block';
-  document.getElementById('wardView').style.display='none';
-  document.getElementById('bc').innerHTML=`<a onclick="goHome()"><i class="ti ti-building-hospital" style="font-size:13px;vertical-align:-1px;margin-right:3px"></i>All wards</a>`;
-  const g=document.getElementById('deptGrid');
-  g.innerHTML=DEPTS.map(d=>{
+  document.getElementById('summaryGrid').innerHTML=`
+    <div class="sum-card sc-blue">
+      <span class="sc-icon">🏥</span>
+      <div class="sc-val cv-blue">${total}</div>
+      <div class="sc-lbl">Total beds</div>
+    </div>
+    <div class="sum-card sc-amber">
+      <span class="sc-icon">🛏️</span>
+      <div class="sc-val cv-amber">${adm}</div>
+      <div class="sc-lbl">Occupied beds</div>
+      <div class="sc-badge badge-up">+3 today</div>
+    </div>
+    <div class="sum-card sc-green">
+      <span class="sc-icon">✅</span>
+      <div class="sc-val cv-green">${avail}</div>
+      <div class="sc-lbl">Available beds</div>
+    </div>
+    <div class="sum-card sc-teal">
+      <span class="sc-icon">📊</span>
+      <div class="sc-val" style="color:${occColor}">${occ}%</div>
+      <div class="sc-lbl">Occupancy rate</div>
+      <div class="occ-bar-wrap">
+        <div class="occ-bar-bg"><div class="occ-bar-fill" style="width:${occ}%;background:${occColor}"></div></div>
+      </div>
+    </div>
+    <div class="sum-card sc-red">
+      <span class="sc-icon">⚠️</span>
+      <div class="sc-val cv-red">${critD}</div>
+      <div class="sc-lbl">Critical wards</div>
+      ${critD>0?`<div class="sc-badge badge-up">&lt;25% free</div>`:''}
+    </div>
+    <div class="sum-card sc-red">
+      <span class="sc-icon">🚨</span>
+      <div class="sc-val cv-red">${hiRisk}</div>
+      <div class="sc-lbl">High-risk patients</div>
+    </div>
+  `;
+
+  // Ward cards
+  document.getElementById('deptGrid').innerHTML=DEPTS.map(d=>{
     const p=pct(d),cl=dClass(d);
-    return `<div class="dc dc-${cl}" onclick="openDept('${d.id}')">
-      <span class="dpct dpct-${cl}">${p}% free</span>
-      <div class="dn">${d.name}</div>
-      <div class="di">${d.avail}/${d.total} beds free<br>${d.admitted} admitted</div>
-    </div>`;}).join('');
+    const fillW=Math.round((1-d.avail/d.total)*100);
+    const hiCnt=(PATIENTS[d.id]||[]).filter(x=>x.risk==='High').length;
+    return `<div class="dept-card dc-${cl}" onclick="openDept('${d.id}')">
+      <div class="dc-pct pct-${cl}">${p}% free</div>
+      <div class="dc-name">${d.name}</div>
+      <div class="dc-beds-row">
+        <div class="dc-beds-big">${d.avail}</div>
+        <div class="dc-beds-of">of ${d.total} free</div>
+      </div>
+      <div class="dc-info">${d.admitted} admitted${hiCnt>0?` · <span style="color:#FF7070">${hiCnt} high-risk</span>`:''}</div>
+      <div class="dc-bar"><div class="dc-bar-fill" style="width:${fillW}%"></div></div>
+      <div class="dc-click-hint">View patients →</div>
+    </div>`;
+  }).join('');
 }
 
+/* ── WARD VIEW ── */
 function openDept(id){
   curDept=id;curPt=null;
   const d=DEPTS.find(x=>x.id===id);
   const pts=PATIENTS[id]||[];
-  document.getElementById('deptView').style.display='none';
+  document.getElementById('homeView').style.display='none';
   document.getElementById('wardView').style.display='block';
-  document.getElementById('bc').innerHTML=
-    `<a onclick="goHome()"><i class="ti ti-building-hospital" style="font-size:13px;vertical-align:-1px;margin-right:2px"></i>All wards</a>
-     <span class="bc-sep">›</span><span>${d.name}</span>`;
+  setBc([{label:'All wards',action:'renderHome()'},{label:d.name}]);
+
   const p=pct(d),cl=dClass(d);
-  document.getElementById('wardHeader').innerHTML=`
-    <div class="wh-stat"><div class="wh-val sv-info">${d.total}</div><div class="wh-lbl">Total beds</div></div>
-    <div class="wh-stat"><div class="wh-val sv-warn">${d.admitted}</div><div class="wh-lbl">Admitted</div></div>
-    <div class="wh-stat"><div class="wh-val sv-ok">${d.avail}</div><div class="wh-lbl">Available</div></div>
-    <div class="wh-stat"><div class="wh-val sv-${cl==='ok'?'ok':cl==='warn'?'warn':'crit'}">${p}%</div><div class="wh-lbl">Beds free</div></div>
-    <div class="wh-stat"><div class="wh-val sv-crit">${pts.filter(p=>p.risk==='High').length}</div><div class="wh-lbl">High risk</div></div>
-    <div class="wh-stat"><div class="wh-val sv-warn">${pts.filter(p=>p.risk==='Medium').length}</div><div class="wh-lbl">Medium risk</div></div>`;
-  document.getElementById('mathBadge').innerHTML=
-    `<i class="ti ti-math-function" style="font-size:13px;vertical-align:-1px;margin-right:4px"></i>
-     <b>Mathematical model active:</b> MEWS scoring · Mahalanobis distance anomaly detection · EWMA control charts on all ${pts.length} patients`;
+  const hiCnt=pts.filter(x=>x.risk==='High').length;
+  const medCnt=pts.filter(x=>x.risk==='Medium').length;
+  const lowCnt=pts.filter(x=>x.risk==='Low').length;
+  const occPct=Math.round(d.admitted/d.total*100);
+  const occColor=occPct>=85?'var(--red)':occPct>=70?'var(--amber)':'var(--green)';
+  const freeColor=cl==='ok'?'sv-green':cl==='warn'?'sv-amber':'sv-red';
+
+  document.getElementById('wardHero').innerHTML=`
+    <div class="ward-hero-top">
+      <div>
+        <div class="ward-hero-name">${d.name}</div>
+        <div class="ward-hero-sub">Ward ID: ${d.id} · ${pts.length} patient${pts.length!==1?'s':''} loaded</div>
+      </div>
+      <div class="ward-occ-wrap" style="min-width:180px">
+        <div class="ward-occ-bar-bg"><div class="ward-occ-bar-fill" style="width:${occPct}%;background:${occColor}"></div></div>
+        <div class="ward-occ-pct">${occPct}% occupied</div>
+      </div>
+    </div>
+    <div class="ward-stats-row">
+      <div class="wh-stat"><div class="wh-val cv-blue">${d.total}</div><div class="wh-lbl">Total beds</div></div>
+      <div class="wh-stat"><div class="wh-val cv-amber">${d.admitted}</div><div class="wh-lbl">Occupied</div></div>
+      <div class="wh-stat"><div class="wh-val cv-green">${d.avail}</div><div class="wh-lbl">Available</div></div>
+      <div class="wh-stat"><div class="wh-val ${freeColor}">${p}%</div><div class="wh-lbl">Beds free</div></div>
+      <div class="wh-stat"><div class="wh-val cv-red">${hiCnt}</div><div class="wh-lbl">High risk</div></div>
+      <div class="wh-stat"><div class="wh-val cv-amber">${medCnt}</div><div class="wh-lbl">Medium risk</div></div>
+      <div class="wh-stat"><div class="wh-val cv-green">${lowCnt}</div><div class="wh-lbl">Low risk</div></div>
+    </div>`;
+
+  document.getElementById('mlBadge').innerHTML=`
+    <div class="ml-badge-icon">🧮</div>
+    <div class="ml-badge-body">
+      <b>Ensemble ML active on all ${pts.length} patients —</b>
+      MEWS · Mahalanobis Distance · EWMA · Isolation Forest · Random Forest · LSTM deterioration forecast
+    </div>`;
+
+  document.getElementById('ptSectionTitle').textContent=`${d.name} — patients (${pts.length})`;
+
   const g=document.getElementById('ptGrid');
-  if(!pts.length){g.innerHTML=`<div style="color:var(--color-text-tertiary);font-size:13px;padding:20px;grid-column:1/-1">No patient records loaded for this ward.</div>`;return;}
+  if(!pts.length){
+    g.innerHTML=`<div class="empty" style="grid-column:1/-1">No patient records loaded for this ward.</div>`;
+    return;
+  }
   g.innerHTML=pts.map(p=>{
-    const m=mews(p);const mw=mewsWidth(m);const mc=mewsColor(m);
+    const m=mews(p),mc=mewsColor(m),mw=mewsWidth(m);
     const rc=p.risk==='High'?'high':p.risk==='Medium'?'med':'low';
-    return `<div class="pc pc-${rc}" onclick="openPatient('${curDept}','${p.id}')">
-      <span class="prisk prisk-${rc}">${p.risk}</span>
-      <div class="pn">${p.id} · ${p.name.split(' ')[0]}</div>
-      <div class="pi">Bed ${p.bed}<br>HR ${p.hr} · SpO₂ ${p.spo2}%<br>MEWS: ${m}</div>
+    const ens=ensemble(p);
+    return `<div class="pt-card pc-${rc}" onclick="openPatient('${curDept}','${p.id}')">
+      <div class="pc-risk risk-${rc}">${p.risk}</div>
+      <div class="pt-name">${p.id} · ${p.name.split(' ')[0]}</div>
+      <div class="pt-info">Bed ${p.bed}<br>HR ${p.hr} · SpO₂ ${p.spo2}%<br>MEWS ${m} · Ens ${Math.round(ens.total*100)}%</div>
       <div class="mews-bar"><div class="mews-fill" style="width:${mw}%;background:${mc}"></div></div>
-    </div>`;}).join('');
+    </div>`;
+  }).join('');
 }
 
+/* ── PATIENT MODAL ── */
 function openPatient(deptId,pid){
   const p=(PATIENTS[deptId]||[]).find(x=>x.id===pid);
-  if(!p)return;curPt=p;activeTab='vitals';
+  if(!p)return;
+  curPt=p;activeTab='vitals';
   document.getElementById('modalTitle').textContent=`${p.id} — ${p.name}`;
   renderModal(p);
   document.getElementById('ptModal').style.display='flex';
 }
-
 function closeModal(){document.getElementById('ptModal').style.display='none';}
 document.getElementById('ptModal').addEventListener('click',e=>{if(e.target===document.getElementById('ptModal'))closeModal();});
-
 function setTab(t){activeTab=t;if(curPt)renderModal(curPt);}
 
-function vClass(v,lo,hi){return v<lo||v>hi?'vcrit':v<lo*1.08||v>hi*0.94?'vwarn':'vok';}
-
 function renderModal(p){
-  const m=mews(p);
-  const mah=mahalanobis(p);
-  const ew=ewmaFlag(p);
-  const rc=p.risk==='High'?'rp-high':p.risk==='Medium'?'rp-med':'rp-low';
-  const mc=mewsColor(m);
+  const m=mews(p),mah=mahalanobis(p),ew=ewmaFlag(p);
+  const iso=isolationForest(p),rf=randomForest(p),lstm=lstmPredict(p),ens=ensemble(p);
+  const mc=mewsColor(m),rc=p.risk==='High'?'high':p.risk==='Medium'?'med':'low';
 
   let html=`
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-      <span class="prisk prisk-${p.risk==='High'?'high':p.risk==='Medium'?'med':'low'}" style="font-size:11px">${p.risk} risk</span>
-      <span style="font-size:12px;color:var(--color-text-secondary)">${p.dx} · Age ${p.age}${p.gender} · Bed ${p.bed} · Admitted ${p.admit}</span>
+    <div class="pt-meta">
+      <span class="chip chip-${rc==='high'?'red':rc==='med'?'amber':'green'}">${p.risk} risk</span>
+      <span>${p.dx}</span><span style="color:var(--txt3)">·</span>
+      <span>Age ${p.age}${p.gender}</span><span style="color:var(--txt3)">·</span>
+      <span>Bed ${p.bed}</span><span style="color:var(--txt3)">·</span>
+      <span>Admitted ${p.admit}</span>
     </div>
-    <div class="vtab-row">
-      <div class="vtab ${activeTab==='vitals'?'on':''}" onclick="setTab('vitals')">Vitals</div>
-      <div class="vtab ${activeTab==='math'?'on':''}" onclick="setTab('math')">Math model</div>
-      <div class="vtab ${activeTab==='history'?'on':''}" onclick="setTab('history')">History</div>
-      <div class="vtab ${activeTab==='ai'?'on':''}" onclick="setTab('ai')">AI analysis</div>
+    <div class="tab-row">
+      <div class="tab ${activeTab==='vitals'?'on':''}" onclick="setTab('vitals')">Vitals</div>
+      <div class="tab ${activeTab==='ml'?'on':''}" onclick="setTab('ml')">ML Models</div>
+      <div class="tab ${activeTab==='history'?'on':''}" onclick="setTab('history')">History</div>
+      <div class="tab ${activeTab==='ai'?'on':''}" onclick="setTab('ai')">AI Analysis</div>
     </div>`;
 
   if(activeTab==='vitals'){
-    html+=`
-      <div class="vrow"><span class="vlbl">Heart rate</span><span class="vval ${vClass(p.hr,50,100)}">${p.hr} bpm</span></div>
-      <div class="vrow"><span class="vlbl">Blood pressure</span><span class="vval ${vClass(p.sbp,90,140)}">${p.sbp}/${p.dbp} mmHg</span></div>
-      <div class="vrow"><span class="vlbl">SpO₂</span><span class="vval ${vClass(p.spo2,95,100)}">${p.spo2}%</span></div>
-      <div class="vrow"><span class="vlbl">Temperature</span><span class="vval ${vClass(p.temp,36.1,37.9)}">${p.temp}°F</span></div>
-      <div class="vrow"><span class="vlbl">Respiratory rate</span><span class="vval ${vClass(p.rr,12,20)}">${p.rr} /min</span></div>
-      <div class="vrow"><span class="vlbl">MEWS score</span><span class="vval" style="color:${mc}">${m} / 9</span></div>
-      <div class="mews-bar" style="margin-top:6px"><div class="mews-fill" style="width:${mewsWidth(m)}%;background:${mc}"></div></div>
-      <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:4px">MEWS ≥5 → immediate escalation · ≥3 → increased monitoring</div>`;
-
     const flags=[];
     if(p.hr>100||p.hr<50)flags.push({l:'Heart rate',v:p.hr+' bpm',t:p.hr>100?'hi':'lo'});
     if(p.spo2<95)flags.push({l:'SpO₂',v:p.spo2+'%',t:'lo'});
     if(p.sbp>140||p.sbp<90)flags.push({l:'Systolic BP',v:p.sbp+' mmHg',t:p.sbp>140?'hi':'lo'});
     if(p.temp>37.9||p.temp<36.1)flags.push({l:'Temperature',v:p.temp+'°F',t:p.temp>37.9?'hi':'lo'});
-    if(p.rr>20||p.rr<12)flags.push({l:'Respiratory rate',v:p.rr+'/min',t:p.rr>20?'hi':'lo'});
+    if(p.rr>20||p.rr<12)flags.push({l:'Resp. rate',v:p.rr+'/min',t:p.rr>20?'hi':'lo'});
+    html+=`
+      <div class="v-row"><span class="v-lbl">Heart rate</span><span class="v-val ${vClass(p.hr,50,100)}">${p.hr} bpm</span></div>
+      <div class="v-row"><span class="v-lbl">Blood pressure</span><span class="v-val ${vClass(p.sbp,90,140)}">${p.sbp}/${p.dbp} mmHg</span></div>
+      <div class="v-row"><span class="v-lbl">SpO₂</span><span class="v-val ${vClass(p.spo2,95,100)}">${p.spo2}%</span></div>
+      <div class="v-row"><span class="v-lbl">Temperature</span><span class="v-val ${vClass(p.temp,36.1,37.9)}">${p.temp}°F</span></div>
+      <div class="v-row"><span class="v-lbl">Respiratory rate</span><span class="v-val ${vClass(p.rr,12,20)}">${p.rr} /min</span></div>
+      <div class="v-row"><span class="v-lbl">MEWS score</span><span class="v-val" style="color:${mc}">${m} / 9</span></div>
+      <div class="mews-bar" style="margin-top:6px"><div class="mews-fill" style="width:${mewsWidth(m)}%;background:${mc}"></div></div>
+      <div style="font-size:10px;color:var(--txt3);margin-top:4px">MEWS ≥5 → immediate escalation · ≥3 → increased monitoring</div>`;
     if(flags.length){
-      html+=`<div class="section-title">Vital flags</div>`;
+      html+=`<div class="slbl">Vital flags</div>`;
       html+=flags.map(f=>`<div class="flag-row">
         <div class="flag-icon ${f.t==='hi'?'fi-hi':'fi-lo'}">${f.t==='hi'?'↑':'↓'}</div>
-        <span style="color:var(--color-text-primary)">${f.l}</span>
-        <span style="color:var(--color-text-secondary);margin-left:auto">${f.v}</span>
+        <span style="color:var(--txt)">${f.l}</span>
+        <span style="color:var(--txt3);margin-left:auto;font-family:var(--mono);font-size:11px">${f.v}</span>
       </div>`).join('');
     }
-  }
-
-  else if(activeTab==='math'){
-    const mewsInterpret=m>=5?'CRITICAL — immediate medical review required':m>=3?'URGENT — increased monitoring frequency':m>=1?'LOW — routine monitoring':'NORMAL — stable vital signs';
-    const mahInterpret=parseFloat(mah)>3.5?'ANOMALY DETECTED — vitals deviate significantly from population mean':'Within normal multivariate range';
     html+=`
-      <div class="math-section">
-        <div class="math-title"><i class="ti ti-calculator" style="font-size:13px" aria-hidden="true"></i> Modified Early Warning Score (MEWS)</div>
-        <div class="math-eq">MEWS = Σ wᵢ · f(vᵢ)   where vᵢ ∈ {RR, SpO₂, Temp, HR, SBP}</div>
-        <div class="math-text">Each vital sign is mapped through a piecewise linear function fᵢ to a score in {0,1,2,3}. Weights wᵢ = 1 for all parameters in standard MEWS. Sum ranges 0–15; clinical threshold for escalation: MEWS ≥ 3.</div>
-        <div class="vrow" style="margin-top:8px"><span class="vlbl">Score for ${p.name.split(' ')[0]}</span><span class="vval" style="color:${mc}">${m} / 9</span></div>
-        <div style="font-size:12px;margin-top:4px;color:${mc}">${mewsInterpret}</div>
-      </div>
-      <div class="math-section">
-        <div class="math-title"><i class="ti ti-vector-triangle" style="font-size:13px" aria-hidden="true"></i> Mahalanobis distance (multivariate anomaly)</div>
-        <div class="math-eq">D²(x) = (x − μ)ᵀ Σ⁻¹ (x − μ)</div>
-        <div class="math-eq">d(x) = √D²  =  √Σᵢ ((xᵢ − μᵢ)/σᵢ)²   [assuming Σ diagonal]</div>
-        <div class="math-text">μ is the population mean vital vector; Σ is the covariance matrix. Under a Gaussian model, D² ~ χ²(k) where k=5 parameters. Threshold at χ²₀.₉₅(5) = 11.07, i.e. d > √11.07 ≈ 3.33 flags an anomaly.</div>
-        <div class="vrow" style="margin-top:8px"><span class="vlbl">d(x) for ${p.name.split(' ')[0]}</span><span class="vval ${parseFloat(mah)>3.33?'vcrit':'vok'}">${mah}</span></div>
-        <div style="font-size:12px;margin-top:4px;color:${parseFloat(mah)>3.33?'var(--color-text-danger)':'var(--color-text-success)'}">${mahInterpret}</div>
-      </div>
-      <div class="math-section">
-        <div class="math-title"><i class="ti ti-chart-line" style="font-size:13px" aria-hidden="true"></i> EWMA control chart (trend detection)</div>
-        <div class="math-eq">Zₜ = λ·Xₜ + (1−λ)·Zₜ₋₁,   λ = 0.2</div>
-        <div class="math-eq">UCL = μ₀ + 3σ√(λ/(2−λ))   =  ${ew.ucl} bpm (HR)</div>
-        <div class="math-text">λ controls sensitivity to recent observations. EWMA detects small persistent shifts better than Shewhart charts. UCL derived from in-control σ=15 bpm. Current EWMA statistic Zₜ = ${ew.ewma} bpm.</div>
-        <div class="vrow" style="margin-top:8px"><span class="vlbl">HR EWMA Zₜ</span><span class="vval ${ew.flagged?'vcrit':'vok'}">${ew.ewma} bpm ${ew.flagged?'⬆ ABOVE UCL':''}</span></div>
-        <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:4px">Simulated 5-reading trend: ${ew.trend.join(' → ')}</div>
+      <div class="slbl">Ensemble risk score</div>
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 0">
+        <div style="font-size:32px;font-weight:600;font-family:var(--mono);color:${ensColor(ens.total)}">${Math.round(ens.total*100)}%</div>
+        <div style="flex:1">
+          <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">
+            <div style="height:100%;width:${Math.round(ens.total*100)}%;background:${ensColor(ens.total)};border-radius:4px;transition:width .5s"></div>
+          </div>
+          <div style="font-size:11px;color:var(--txt3);margin-top:5px">Combined score from 6 models — threshold: 60% = High risk</div>
+        </div>
       </div>`;
   }
 
+  else if(activeTab==='ml'){
+    const mewsInterp=m>=5?'CRITICAL — immediate review':m>=3?'URGENT — increase monitoring frequency':m>=1?'LOW — routine monitoring':'NORMAL — stable';
+    html+=`<div class="math-card">
+      <div class="math-card-title mct-mews">📊 MEWS — Modified Early Warning Score</div>
+      <div class="math-eq">MEWS = Σ wᵢ · f(vᵢ)   where vᵢ ∈ {RR, SpO₂, Temp, HR, SBP}<br>fᵢ : ℝ → {0,1,2,3}  (piecewise clinical thresholds)</div>
+      <div class="math-text">Each vital sign is scored 0–3 via a piecewise function. Threshold ≥3 triggers increased monitoring; ≥5 triggers immediate escalation.</div>
+      <div class="math-result-row"><span class="mrl">Score</span><span class="mrv" style="color:${mc}">${m} / 9 — ${mewsInterp}</span></div>
+      <div class="mews-bar" style="margin-top:8px"><div class="mews-fill" style="width:${mewsWidth(m)}%;background:${mc}"></div></div>
+    </div>`;
+    const mahV=+mah.toFixed(2),mahFlagged=mahV>3.33;
+    html+=`<div class="math-card">
+      <div class="math-card-title mct-mah">🔵 Mahalanobis Distance — Multivariate Anomaly</div>
+      <div class="math-eq">D²(x) = (x − μ)ᵀ Σ⁻¹ (x − μ)<br>d(x) = √D²   [diagonal Σ → d = √Σᵢ((xᵢ−μᵢ)/σᵢ)²]</div>
+      <div class="math-text">Under Gaussian model, D² ~ χ²(k), k=6 vitals. Threshold d > 3.33 flags anomaly.</div>
+      <div class="math-result-row"><span class="mrl">d(x)</span><span class="mrv ${mahFlagged?'vcrit':'vok'}">${mahV} ${mahFlagged?'⚠ ANOMALY':'✓ Normal range'}</span></div>
+    </div>`;
+    html+=`<div class="math-card">
+      <div class="math-card-title mct-ewma">📈 EWMA Control Chart — Trend Detection</div>
+      <div class="math-eq">Zₜ = λ·Xₜ + (1−λ)·Zₜ₋₁,   λ = 0.2<br>UCL = μ₀ + 3σ√(λ/(2−λ)) = ${ew.ucl} bpm</div>
+      <div class="math-text">λ=0.2 balances sensitivity vs stability. Detects small persistent shifts better than Shewhart charts.</div>
+      <div class="sparkline" style="margin:8px 0">
+        ${ew.trend.map(v=>{const h=Math.max(4,Math.round((v/ew.ucl)*28));const c=v>ew.ucl?'var(--red)':v>ew.ucl*.85?'var(--amber)':'var(--green)';return`<div class="spark-bar" style="height:${h}px;background:${c}"></div>`;}).join('')}
+        <span style="font-size:10px;color:var(--txt3);margin-left:6px;align-self:flex-end">HR EWMA trend</span>
+      </div>
+      <div class="math-result-row"><span class="mrl">Zₜ = ${ew.ewma} bpm (UCL ${ew.ucl})</span><span class="mrv ${ew.flagged?'vcrit':'vok'}">${ew.flagged?'⬆ ABOVE UCL':'Within control limits'}</span></div>
+    </div>`;
+    html+=`<div class="math-card">
+      <div class="math-card-title mct-iso">🌲 Isolation Forest — Unsupervised Anomaly</div>
+      <div class="math-eq">s(x,n) = 2^(−E[h(x)] / c(n))</div>
+      <div class="math-text">Isolates anomalies via random binary partitioning. Score near 1 = anomaly. Fully unsupervised.</div>
+      <div class="math-result-row"><span class="mrl">Anomaly score</span><span class="mrv ${iso.anomaly?'vcrit':'vok'}">${iso.score} ${iso.anomaly?'⚠ FLAGGED':'✓ Normal'} (threshold ${iso.threshold})</span></div>
+    </div>`;
+    const rfColor=rf.label==='High'?'var(--red)':rf.label==='Medium'?'var(--amber)':'var(--green)';
+    html+=`<div class="math-card">
+      <div class="math-card-title mct-rf">🌳 Random Forest — Supervised Classification</div>
+      <div class="math-eq">ŷ = mode{hₜ(x)}ᵀ₌₁,   hₜ = decision tree on bootstrap sample</div>
+      <div class="math-text">Ensemble of decision trees. Feature importance derived from mean Gini decrease.</div>
+      <div class="slbl" style="margin-top:10px;margin-bottom:6px">Feature importance</div>
+      ${rf.importance.map(f=>`<div class="e-model"><div class="e-name" style="font-size:10px">${f.name}</div><div class="e-bar-bg"><div class="e-bar-fill" style="width:${f.contribution}%;background:${scoreBarColor(f.contribution/100)}"></div></div><div class="e-score" style="font-size:10px">${f.contribution}%</div></div>`).join('')}
+      <div class="math-result-row"><span class="mrl">Risk class</span><span class="mrv" style="color:${rfColor}">${rf.label} risk (score ${rf.riskScore})</span></div>
+    </div>`;
+    const lstmColor=lstm.deteriorate?'var(--red)':'var(--green)';
+    html+=`<div class="math-card">
+      <div class="math-card-title mct-lstm">🧠 LSTM — 30-min Deterioration Forecast</div>
+      <div class="math-eq">hₜ = oₜ ⊙ tanh(cₜ),   cₜ = fₜ ⊙ cₜ₋₁ + iₜ ⊙ g̃ₜ</div>
+      <div class="math-text">Reads 10 vital readings (every 5 min) and predicts HR at t+30min. Detects gradual deterioration MEWS misses.</div>
+      <div class="sparkline" style="margin:8px 0">
+        ${lstm.history.map((v,i)=>{const maxH=Math.max(...lstm.history);const h=Math.max(4,Math.round((v/maxH)*28));return`<div class="spark-bar" style="height:${h}px;background:${i===9?'var(--accent)':'var(--txt3)'}"></div>`;}).join('')}
+        <span style="font-size:10px;color:var(--txt3);margin-left:6px;align-self:flex-end">10 readings → forecast</span>
+      </div>
+      <div class="math-result-row"><span class="mrl">Predicted HR +30min</span><span class="mrv" style="color:${lstmColor}">${lstm.pred30min} bpm ${lstm.deteriorate?'⚠ DETERIORATION LIKELY':'✓ Stable'}</span></div>
+    </div>`;
+    const ensModels=[
+      {name:'MEWS',score:ens.scores.mews,color:'var(--amber)'},
+      {name:'Mahalanobis',score:ens.scores.mah,color:'var(--teal)'},
+      {name:'EWMA',score:ens.scores.ewma,color:'var(--green)'},
+      {name:'Isolation F',score:ens.scores.iso,color:'var(--purple)'},
+      {name:'Random F',score:ens.scores.rf,color:'var(--accent)'},
+      {name:'LSTM',score:ens.scores.lstm,color:'#F472B6'},
+    ];
+    html+=`<div class="ensemble-bar-wrap">
+      <div class="ensemble-title">🔗 Ensemble Fusion — Weighted Risk Score</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--txt3);margin-bottom:10px">R = Σᵢ wᵢ · sᵢ</div>
+      ${ensModels.map(m=>`<div class="e-model"><div class="e-name" style="color:${m.color}">${m.name}</div><div class="e-bar-bg"><div class="e-bar-fill" style="width:${Math.round(m.score*100)}%;background:${m.color}"></div></div><div class="e-score" style="font-size:10px">${Math.round(m.score*100)}%</div></div>`).join('')}
+      <div class="ensemble-total"><div class="et-lbl">Ensemble R</div><div class="et-val" style="color:${ensColor(ens.total)}">${Math.round(ens.total*100)}% <span class="chip ${ensChipCls(ens.total)}">${ens.total>.6?'HIGH':ens.total>.35?'MEDIUM':'LOW'}</span></div></div>
+    </div>`;
+  }
+
   else if(activeTab==='history'){
-    html+=`<div class="section-title">Medical history</div>`;
+    html+=`<div class="slbl">Medical history</div>`;
     html+=p.history.map(h=>`<div class="hist-entry"><div class="hist-date">${h.date}</div>${h.note}</div>`).join('');
   }
 
   else if(activeTab==='ai'){
     const cached=aiCache[p.id];
-    if(cached){
-      html+=renderAIResult(cached);
-    } else {
-      html+=`
-        <div class="ai-section">
-          <div class="ai-title"><i class="ti ti-robot" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>AI clinical analysis</div>
-          <div class="ai-loading" id="aiStatus">Click below to run analysis via Claude AI</div>
-          <div id="aiContent"></div>
-        </div>
-        <button class="ai-btn" onclick="runAI('${p.id}')"><i class="ti ti-robot" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>Run AI clinical analysis ↗</button>`;
-    }
+    if(cached){html+=renderAIResult(cached,p);}
+    else{html+=`<div class="ai-card"><div class="ai-card-title">🤖 AI Clinical Analysis</div><div class="ai-loading" id="aiStatus">Click below to run analysis via Claude AI</div><div id="aiContent"></div></div><button class="ai-run-btn" onclick="runAI('${p.id}')">Run AI clinical analysis →</button>`;}
   }
 
   document.getElementById('modalBody').innerHTML=html;
 }
 
-function renderAIResult(res){
+function renderAIResult(res,p){
   const ai=res.ai_analysis||res;
   const urgency=(ai.urgency||'routine').toUpperCase();
   const uc=urgency==='IMMEDIATE'?'vcrit':urgency==='URGENT'?'vwarn':'vok';
-  const anoms=(ai.anomalies||[]).map(a=>
-    `<div class="flag-row"><div class="flag-icon fi-hi">!</div><span style="color:var(--color-text-primary)">${a.param}</span><span style="font-size:11px;color:var(--color-text-secondary);margin-left:8px">${a.note}</span></div>`
-  ).join('')||`<div style="font-size:12px;color:var(--color-text-success)">No anomalies detected</div>`;
-  return `<div class="ai-section">
-    <div class="ai-title"><i class="ti ti-robot" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>AI clinical analysis</div>
-    <div style="font-size:12px;margin-bottom:10px">Urgency: <span class="vval ${uc}">${urgency}</span></div>
-    <div class="section-title">Detected anomalies</div>${anoms}
-    <div class="section-title">Clinical impression</div>
-    <div class="ai-text">${ai.impression||'—'}</div>
-    <div class="section-title">Recommendations</div>
-    <div class="ai-text">${ai.recommendations||ai.actions||'—'}</div>
-    <div style="font-size:10px;color:var(--color-text-tertiary);margin-top:12px">AI-assisted analysis — verify with clinical judgement</div>
+  const chipC=urgency==='IMMEDIATE'?'chip-red':urgency==='URGENT'?'chip-amber':'chip-green';
+  const anoms=(ai.anomalies||[]).map(a=>`<div class="flag-row"><div class="flag-icon fi-hi">!</div><span style="color:var(--txt)">${a.param}</span><span style="font-size:11px;color:var(--txt3);margin-left:8px">${a.note}</span></div>`).join('')
+    ||`<div style="font-size:12px;color:var(--green);padding:4px 0">No anomalies detected.</div>`;
+  return `<div class="ai-card">
+    <div class="ai-card-title">🤖 AI Clinical Analysis — ${p.name}</div>
+    <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--txt3)">Urgency:</span><span class="chip ${chipC}">${urgency}</span></div>
+    <div class="slbl">Detected anomalies</div>${anoms}
+    <div class="slbl">Clinical impression</div><div class="ai-text">${ai.impression||'—'}</div>
+    <div class="slbl">Recommendations</div><div class="ai-text">${ai.recommendations||ai.actions||'—'}</div>
+    <div style="font-size:10px;color:var(--txt3);margin-top:12px;padding-top:8px;border-top:1px solid var(--border)">AI-assisted — verify with clinical judgement. Not a substitute for physician assessment.</div>
   </div>`;
 }
 
 async function runAI(pid){
-  const btn=document.querySelector('.ai-btn');
+  const btn=document.querySelector('.ai-run-btn');
   if(btn){btn.disabled=true;btn.textContent='Analysing...';}
+  const status=document.getElementById('aiStatus');
+  if(status)status.textContent='Running AI analysis…';
   const p=(PATIENTS[curDept]||[]).find(x=>x.id===pid);
   if(!p)return;
-  const m=mews(p),mah=mahalanobis(p),ew=ewmaFlag(p);
-  const prompt=`You are a clinical AI decision support system in an Indian government hospital. Respond ONLY as valid JSON with no markdown:
+  const m=mews(p),mah=mahalanobis(p).toFixed(2),ew=ewmaFlag(p),ens=ensemble(p);
+  const prompt=`You are a clinical AI decision support system in an Indian government hospital. Respond ONLY as valid JSON with no markdown fences:
 {"anomalies":[{"param":"string","note":"string"}],"impression":"2-3 sentence clinical summary","recommendations":"3 specific clinical actions for the treating doctor","urgency":"immediate|urgent|routine"}
 
 Patient: ${p.name}, Age ${p.age}${p.gender}, Dx: ${p.dx}
-Vitals: HR ${p.hr}bpm, BP ${p.sbp}/${p.dbp}mmHg, SpO2 ${p.spo2}%, Temp ${p.temp}°F, RR ${p.rr}/min
-Mathematical scores: MEWS=${m}/9, Mahalanobis d=${mah} (threshold 3.33), EWMA HR=${ew.ewma} (UCL ${ew.ucl}${ew.flagged?' — FLAGGED':''})
+Vitals: HR ${p.hr}bpm, BP ${p.sbp}/${p.dbp}mmHg, SpO₂ ${p.spo2}%, Temp ${p.temp}°F, RR ${p.rr}/min
+Mathematical models: MEWS=${m}/9, Mahalanobis d=${mah}, EWMA HR=${ew.ewma} (UCL ${ew.ucl}${ew.flagged?' — ABOVE UCL':''}), Ensemble risk=${Math.round(ens.total*100)}%
 History: ${p.history.map(h=>h.note).join('; ')}`;
-  try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})
-    });
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
-    let text=data.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
-    const parsed=JSON.parse(text);
-    aiCache[pid]={ai_analysis:parsed};
+    let text=(data.content||[]).map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    aiCache[pid]={ai_analysis:JSON.parse(text)};
     renderModal(p);
-  } catch(e){
-    const s=document.getElementById('aiStatus');
-    if(s)s.textContent='AI unavailable. Backend must have ANTHROPIC_API_KEY set.';
-    if(btn){btn.disabled=false;btn.textContent='Retry AI analysis ↗';}
+  }catch(e){
+    if(status)status.textContent='AI unavailable — ensure ANTHROPIC_API_KEY is configured.';
+    if(btn){btn.disabled=false;btn.textContent='Retry AI analysis →';}
   }
 }
 
-function goHome(){renderDepts();}
+/* ── GOOGLE SHEETS ── */
+function openSheets(){document.getElementById('sheetsModal').style.display='flex'}
+function closeSheets(){document.getElementById('sheetsModal').style.display='none'}
+document.getElementById('sheetsModal').addEventListener('click',e=>{if(e.target===document.getElementById('sheetsModal'))closeSheets();});
 
-function tick(){const n=new Date();document.getElementById('clock').textContent=n.toLocaleTimeString('en-IN')+' IST';}
+async function loadFromSheets(){
+  const sheetId=document.getElementById('sheetId').value.trim();
+  const apiKey=document.getElementById('apiKey').value.trim();
+  const sheetName=document.getElementById('sheetName').value.trim()||'Patients';
+  const status=document.getElementById('sheetsStatus');
+  if(!sheetId||!apiKey){status.textContent='⚠ Enter Sheet ID and API Key.';status.style.color='var(--amber)';return;}
+  status.textContent='Fetching…';status.style.color='var(--txt3)';
+  try{
+    const url=`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}!A1:P200?key=${apiKey}`;
+    const res=await fetch(url);const data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    const rows=data.values||[];
+    if(rows.length<2)throw new Error('No data rows found. Check sheet name and columns.');
+    const headers=rows[0].map(h=>h.toLowerCase().replace(/\s+/g,'_'));
+    let count=0;
+    rows.slice(1).forEach(row=>{
+      const obj={};headers.forEach((h,i)=>{obj[h]=row[i]||'';});
+      const wardId=(obj.ward||'').toUpperCase();
+      const deptExists=DEPTS.some(d=>d.id===wardId);
+      if(!deptExists){DEPTS.push({id:wardId,name:obj.ward,total:20,avail:10,admitted:0});PATIENTS[wardId]=[];}
+      if(!PATIENTS[wardId])PATIENTS[wardId]=[];
+      PATIENTS[wardId].push({id:obj.patient_id||'P?',name:obj.name||'Unknown',age:+obj.age||0,gender:obj.gender||'',bed:obj.bed||'-',hr:+obj.hr||75,sbp:+obj.sbp||120,dbp:+obj.dbp||80,spo2:+obj.spo2||97,temp:+obj.temp||37.0,rr:+obj.rr||16,risk:obj.risk||'Low',dx:obj.dx||'—',admit:obj.admit_date||'—',history:[{date:'Imported',note:obj.dx||'Imported from Google Sheets'}]});
+      count++;
+    });
+    DEPTS.forEach(d=>{d.admitted=(PATIENTS[d.id]||[]).length;d.avail=d.total-d.admitted;});
+    status.textContent=`✓ Loaded ${count} patients from Sheets.`;status.style.color='var(--green)';
+    setTimeout(closeSheets,1200);
+    renderHome();
+  }catch(e){status.textContent='Error: '+e.message;status.style.color='var(--red)';}
+}
+
+function exportCSV(){
+  const headers=['patient_id','name','age','gender','ward','bed','hr','sbp','dbp','spo2','temp','rr','risk','dx','admit_date'];
+  const rows=[headers.join(',')];
+  DEPTS.forEach(d=>{(PATIENTS[d.id]||[]).forEach(p=>{rows.push([p.id,`"${p.name}"`,p.age,p.gender,d.id,p.bed,p.hr,p.sbp,p.dbp,p.spo2,p.temp,p.rr,p.risk,`"${p.dx}"`,p.admit].join(','));});});
+  const blob=new Blob([rows.join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='patients_export.csv';a.click();
+}
+
+/* ── BREADCRUMB ── */
+function setBc(items){
+  document.getElementById('bc').innerHTML=items.map((item,i)=>{
+    if(item.action)return`<span class="bc-link" onclick="${item.action}">${item.label}</span>`;
+    return`<span>${item.label}</span>`;
+  }).join(`<span class="bc-sep"> › </span>`);
+}
+
+/* ── CLOCK ── */
+function tick(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' IST';}
 tick();setInterval(tick,1000);
-renderStats();
-renderDepts();
-</script>
 
+/* ── INIT ── */
+renderHome();
+</script>
 </body>
 </html>
