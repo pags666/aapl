@@ -601,7 +601,27 @@ function vClass(v,lo,hi){return v<lo||v>hi?'vcrit':v<lo*1.08||v>hi*.94?'vwarn':'
 function ensColor(t){return t>.6?'var(--red)':t>.35?'var(--amber)':'var(--green)'}
 function ensChipCls(t){return t>.6?'chip-red':t>.35?'chip-amber':'chip-green'}
 function scoreBarColor(s){return s>.7?'var(--red)':s>.4?'var(--amber)':'var(--green)'}
+async function loadGovernSheet() {
 
+    const SHEET_ID =
+    "1eECpcgOguZyhQ6ct5Va1Bic1vzb_3TkbQF6Ku-1ARv8";
+
+    const url =
+    `https://opensheet.elk.sh/${SHEET_ID}/GOVERN`;
+
+    const rows = await fetch(url)
+      .then(r => r.json());
+
+    DEPTS = rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        total: Number(row.total),
+        avail: Number(row.avail),
+        admitted: Number(row.admitted)
+    }));
+
+    renderHome();
+}
 /* ── HOME RENDER ── */
 function renderHome(){
   curDept=null;curPt=null;
@@ -974,7 +994,11 @@ async function loadFromSheets(){
     DEPTS.forEach(d=>{d.admitted=(PATIENTS[d.id]||[]).length;d.avail=d.total-d.admitted;});
     status.textContent=`✓ Loaded ${count} patients from Sheets.`;status.style.color='var(--green)';
     setTimeout(closeSheets,1200);
-    renderHome();
+    loadGovernSheet();
+
+    setInterval(() => {
+        loadGovernSheet();
+    }, 10000);
   }catch(e){status.textContent='Error: '+e.message;status.style.color='var(--red)';}
 }
 
@@ -999,7 +1023,11 @@ function tick(){document.getElementById('clock').textContent=new Date().toLocale
 tick();setInterval(tick,1000);
 
 /* ── INIT ── */
-renderHome();
+loadGovernSheet();
+
+setInterval(() => {
+    loadGovernSheet();
+}, 10000);
 </script>
 </body>
 </html>
