@@ -601,6 +601,191 @@ function vClass(v,lo,hi){return v<lo||v>hi?'vcrit':v<lo*1.08||v>hi*.94?'vwarn':'
 function ensColor(t){return t>.6?'var(--red)':t>.35?'var(--amber)':'var(--green)'}
 function ensChipCls(t){return t>.6?'chip-red':t>.35?'chip-amber':'chip-green'}
 function scoreBarColor(s){return s>.7?'var(--red)':s>.4?'var(--amber)':'var(--green)'}
+async function loadDiabetologyPatients() {
+
+    const rows = await fetch(
+        "https://opensheet.elk.sh/1eECpcgOguZyhQ6ct5Va1Bic1vzb_3TkbQF6Ku-1ARv8/DIAB"
+    ).then(r => r.json());
+
+    PATIENTS["DIAB"] = rows.map(r => ({
+
+        id: r["Patient ID"],
+        name: r["Name"],
+        age: Number(r["Age"]),
+        gender: r["Gender"],
+        bed: r["Bed No"],
+
+        hr: Number(r["HR"]),
+        sbp: Number(r["SBP"]),
+        dbp: Number(r["DBP"]),
+        spo2: Number(r["SpO2"]),
+        temp: Number(r["Temp"]),
+        rr: Number(r["RR"]),
+
+        diagnosis: r["Diagnosis"],
+        risk: r["Risk"],
+
+        hba1c: Number(r["HbA1c"]),
+        fbs: Number(r["FBS"]),
+        ppbs: Number(r["PPBS"]),
+
+        history: [{
+            date: new Date().toLocaleDateString(),
+            note: r["Diagnosis"]
+        }]
+    }));
+}
+async function loadNeurologyPatients() {
+
+  const rows = await fetch(
+    "https://opensheet.elk.sh/1eECpcgOguZyhQ6ct5Va1Bic1vzb_3TkbQF6Ku-1ARv8/NEU"
+  ).then(r => r.json());
+
+  PATIENTS["NEU"] = rows.map(r => ({
+
+    id: r["Patient ID"],
+    name: r["Name"],
+    age: +r["Age"],
+    gender: r["Gender"],
+    bed: r["Bed No"],
+
+    hr: +r["HR"],
+    sbp: +r["SBP"],
+    dbp: +r["DBP"],
+    spo2: +r["SpO2"],
+    temp: +r["Temp"],
+    rr: +r["RR"],
+
+    diagnosis: r["Diagnosis"],
+    risk: r["Risk"],
+
+    gcs: +r["GCS"],
+    nihss: +r["NIHSS"],
+    speech: r["Speech"]
+
+  }));
+}
+async function loadICUPatients() {
+
+  const rows = await fetch(
+    "https://opensheet.elk.sh/1eECpcgOguZyhQ6ct5Va1Bic1vzb_3TkbQF6Ku-1ARv8/ICU"
+  ).then(r => r.json());
+
+  PATIENTS["ICU"] = rows.map(r => ({
+
+    id: r["Patient ID"],
+    name: r["Name"],
+    age: +r["Age"],
+    gender: r["Gender"],
+    bed: r["Bed No"],
+
+    hr: +r["HR"],
+    sbp: +r["SBP"],
+    dbp: +r["DBP"],
+    spo2: +r["SpO2"],
+    temp: +r["Temp"],
+    rr: +r["RR"],
+
+    diagnosis: r["Diagnosis"],
+    risk: r["Risk"],
+
+    ventilator: r["Ventilator"],
+    fio2: +r["FiO2"],
+    gcs: +r["GCS"],
+    lactate: +r["Lactate"]
+
+  }));
+}
+  async function loadUrologyPatients() {
+
+  const rows = await fetch(
+    "https://opensheet.elk.sh/1eECpcgOguZyhQ6ct5Va1Bic1vzb_3TkbQF6Ku-1ARv8/URO"
+  ).then(r => r.json());
+
+  PATIENTS["URO"] = rows.map(r => ({
+
+    id: r["Patient ID"],
+    name: r["Name"],
+    age: +r["Age"],
+    gender: r["Gender"],
+    bed: r["Bed No"],
+
+    hr: +r["HR"],
+    sbp: +r["SBP"],
+    dbp: +r["DBP"],
+    spo2: +r["SpO2"],
+    temp: +r["Temp"],
+    rr: +r["RR"],
+
+    diagnosis: r["Diagnosis"],
+    risk: r["Risk"],
+
+    creatinine: +r["Creatinine"],
+    egfr: +r["eGFR"],
+    stoneSize: r["Stone Size"]
+
+  }));
+}
+ async function loadEmergencyPatients() {
+
+  const rows = await fetch(
+    "https://opensheet.elk.sh/1eECpcgOguZyhQ6ct5Va1Bic1vzb_3TkbQF6Ku-1ARv8/EMG"
+  ).then(r => r.json());
+
+  PATIENTS["EMG"] = rows.map(r => ({
+
+    id: r["Patient ID"],
+    name: r["Name"],
+    age: +r["Age"],
+    gender: r["Gender"],
+    bed: r["Bed No"],
+
+    hr: +r["HR"],
+    sbp: +r["SBP"],
+    dbp: +r["DBP"],
+    spo2: +r["SpO2"],
+    temp: +r["Temp"],
+    rr: +r["RR"],
+
+    diagnosis: r["Diagnosis"],
+    risk: r["Risk"],
+
+    triage: r["Triage"],
+    painScore: +r["Pain Score"],
+    arrivalTime: r["Arrival Time"]
+
+  }));
+} 
+async function loadSurgeryPatients() {
+
+  const rows = await fetch(
+    "https://opensheet.elk.sh/1eECpcgOguZyhQ6ct5Va1Bic1vzb_3TkbQF6Ku-1ARv8/SURG"
+  ).then(r => r.json());
+
+  PATIENTS["SURG"] = rows.map(r => ({
+
+    id: r["Patient ID"],
+    name: r["Name"],
+    age: +r["Age"],
+    gender: r["Gender"],
+    bed: r["Bed No"],
+
+    hr: +r["HR"],
+    sbp: +r["SBP"],
+    dbp: +r["DBP"],
+    spo2: +r["SpO2"],
+    temp: +r["Temp"],
+    rr: +r["RR"],
+
+    diagnosis: r["Diagnosis"],
+    risk: r["Risk"],
+
+    procedure: r["Procedure"],
+    surgeryDate: r["Surgery Date"],
+    postOpDay: +r["Post Op Day"]
+
+  }));
+}
 async function loadCardiologyPatients() {
 
     const rows = await fetch(
@@ -741,6 +926,24 @@ function renderHome(){
 
 /* ── WARD VIEW ── */
 function openDept(id){
+  if(id === "SURG"){
+   await loadSurgeryPatients();
+}
+  if(id === "URO"){
+   await loadUrologyPatients();
+}
+  if(id === "EMG"){
+   await loadEmergencyPatients();
+}
+  if(id === "ICU"){
+   await loadICUPatients();
+}
+  if(id === "DIAB"){
+    loadDiabetologyPatients();
+}
+  if(id === "NEU"){
+   await loadNeurologyPatients();
+}
   if(id === "CARD"){
     loadCardiologyPatients();
 }
@@ -884,6 +1087,169 @@ function renderModal(p){
     </div>
   `;
 }
+    if(p.hba1c){
+
+  html += `
+    <div class="slbl">Diabetology Details</div>
+
+    <div class="v-row">
+      <span class="v-lbl">Diagnosis</span>
+      <span class="v-val">${p.diagnosis}</span>
+    </div>
+
+    <div class="v-row">
+      <span class="v-lbl">HbA1c</span>
+      <span class="v-val">${p.hba1c}%</span>
+    </div>
+
+    <div class="v-row">
+      <span class="v-lbl">FBS</span>
+      <span class="v-val">${p.fbs} mg/dL</span>
+    </div>
+
+    <div class="v-row">
+      <span class="v-lbl">PPBS</span>
+      <span class="v-val">${p.ppbs} mg/dL</span>
+    </div>
+  `;
+}
+    if(p.gcs !== undefined){
+
+html += `
+<div class="slbl">Neurology Details</div>
+
+<div class="v-row">
+   <span class="v-lbl">Diagnosis</span>
+   <span class="v-val">${p.diagnosis}</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">GCS</span>
+   <span class="v-val">${p.gcs}</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">NIHSS</span>
+   <span class="v-val">${p.nihss}</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">Speech</span>
+   <span class="v-val">${p.speech}</span>
+</div>
+`;
+}
+    if(p.creatinine !== undefined){
+
+html += `
+<div class="slbl">Urology Details</div>
+
+<div class="v-row">
+   <span class="v-lbl">Diagnosis</span>
+   <span class="v-val">${p.diagnosis}</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">Creatinine</span>
+   <span class="v-val">${p.creatinine} mg/dL</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">eGFR</span>
+   <span class="v-val">${p.egfr}</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">Stone Size</span>
+   <span class="v-val">${p.stoneSize}</span>
+</div>
+`;
+}
+    
+   if(p.procedure){
+
+html += `
+<div class="slbl">Surgery Details</div>
+
+<div class="v-row">
+   <span class="v-lbl">Diagnosis</span>
+   <span class="v-val">${p.diagnosis}</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">Procedure</span>
+   <span class="v-val">${p.procedure}</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">Surgery Date</span>
+   <span class="v-val">${p.surgeryDate}</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">Post Op Day</span>
+   <span class="v-val">${p.postOpDay}</span>
+</div>
+`;
+} 
+   if(p.ventilator !== undefined){
+
+html += `
+<div class="slbl">ICU Details</div>
+
+<div class="v-row">
+   <span class="v-lbl">Diagnosis</span>
+   <span class="v-val">${p.diagnosis}</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">Ventilator</span>
+   <span class="v-val">${p.ventilator}</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">FiO₂</span>
+   <span class="v-val">${p.fio2}%</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">GCS</span>
+   <span class="v-val">${p.gcs}</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">Lactate</span>
+   <span class="v-val">${p.lactate}</span>
+</div>
+`;
+} 
+if(p.triage){
+
+html += `
+<div class="slbl">Emergency Medicine Details</div>
+
+<div class="v-row">
+   <span class="v-lbl">Diagnosis</span>
+   <span class="v-val">${p.diagnosis}</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">Triage</span>
+   <span class="v-val">${p.triage}</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">Pain Score</span>
+   <span class="v-val">${p.painScore}/10</span>
+</div>
+
+<div class="v-row">
+   <span class="v-lbl">Arrival Time</span>
+   <span class="v-val">${p.arrivalTime}</span>
+</div>
+`;
+}
+    
     html+=`
       <div class="slbl">Ensemble risk score</div>
       <div style="display:flex;align-items:center;gap:12px;padding:10px 0">
