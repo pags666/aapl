@@ -606,18 +606,20 @@ async function loadGovernSheet() {
     const SHEET_ID =
     "1eECpcgOguZyhQ6ct5Va1Bic1vzb_3TkbQF6Ku-1ARv8";
 
-    const url =
-    `https://opensheet.elk.sh/${SHEET_ID}/GOVERN`;
+    const rows = await fetch(
+      `https://opensheet.elk.sh/${SHEET_ID}/GOVERN`
+    ).then(r => r.json());
 
-    const rows = await fetch(url)
-      .then(r => r.json());
+    DEPTS = rows.map((row,index) => ({
+        id: `WARD${index+1}`,
 
-    DEPTS = rows.map(row => ({
-        id: row.id,
-        name: row.name,
-        total: Number(row.total),
-        avail: Number(row.avail),
-        admitted: Number(row.admitted)
+        name: row["Department"],
+
+        total: Number(row["Total Beds"]),
+
+        avail: Number(row["Available Beds"]),
+
+        admitted: Number(row["Admitted Patients"])
     }));
 
     renderHome();
