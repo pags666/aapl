@@ -601,6 +601,42 @@ function vClass(v,lo,hi){return v<lo||v>hi?'vcrit':v<lo*1.08||v>hi*.94?'vwarn':'
 function ensColor(t){return t>.6?'var(--red)':t>.35?'var(--amber)':'var(--green)'}
 function ensChipCls(t){return t>.6?'chip-red':t>.35?'chip-amber':'chip-green'}
 function scoreBarColor(s){return s>.7?'var(--red)':s>.4?'var(--amber)':'var(--green)'}
+async function loadCardiologyPatients() {
+
+    const rows = await fetch(
+        "https://opensheet.elk.sh/1eECpcgOguZyhQ6ct5Va1Bic1vzb_3TkbQF6Ku-1ARv8/CARD"
+    ).then(r => r.json());
+
+    PATIENTS["CARD"] = rows.map(r => ({
+
+        id: r["Patient ID"],
+        name: r["Name"],
+        age: Number(r["Age"]),
+        gender: r["Gender"],
+        bed: r["Bed No"],
+
+        hr: Number(r["HR"]),
+        sbp: Number(r["SBP"]),
+        dbp: Number(r["DBP"]),
+        spo2: Number(r["SpO2"]),
+        temp: Number(r["Temp"]),
+        rr: Number(r["RR"]),
+
+        diagnosis: r["Diagnosis"],
+        risk: r["Risk"],
+
+        troponin: r["Troponin"],
+        ef: Number(r["EF (%)"]),
+
+        history: [
+            {
+                date: new Date().toLocaleDateString(),
+                note: r["Diagnosis"]
+            }
+        ]
+
+    }));
+}
 async function loadGovernSheet() {
 
     const SHEET_ID =
@@ -611,7 +647,7 @@ async function loadGovernSheet() {
     ).then(r => r.json());
 
     DEPTS = rows.map((row,index) => ({
-        id: `WARD${index+1}`,
+        id: row["Department"] === "Cardiology"? "CARD": row["Department"],
 
         name: row["Department"],
 
@@ -705,6 +741,9 @@ function renderHome(){
 
 /* ── WARD VIEW ── */
 function openDept(id){
+  if(id === "CARD"){
+    loadCardiologyPatients();
+}
   curDept=id;curPt=null;
   const d=DEPTS.find(x=>x.id===id);
   const pts=PATIENTS[id]||[];
@@ -825,6 +864,26 @@ function renderModal(p){
         <span style="color:var(--txt3);margin-left:auto;font-family:var(--mono);font-size:11px">${f.v}</span>
       </div>`).join('');
     }
+    if(p.troponin){
+  html += `
+    <div class="slbl">Cardiology Details</div>
+
+    <div class="v-row">
+      <span class="v-lbl">Diagnosis</span>
+      <span class="v-val">${p.diagnosis}</span>
+    </div>
+
+    <div class="v-row">
+      <span class="v-lbl">Troponin</span>
+      <span class="v-val">${p.troponin}</span>
+    </div>
+
+    <div class="v-row">
+      <span class="v-lbl">Ejection Fraction</span>
+      <span class="v-val">${p.ef}%</span>
+    </div>
+  `;
+}
     html+=`
       <div class="slbl">Ensemble risk score</div>
       <div style="display:flex;align-items:center;gap:12px;padding:10px 0">
