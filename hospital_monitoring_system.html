@@ -813,8 +813,15 @@ async function loadGovernSheet() {
     ).then(r => r.json());
 
     DEPTS = rows.map((row,index) => ({
-        id: row["Department"] === "Cardiology"? "CARD": row["Department"],
-
+        id:
+        row["Department"] === "Cardiology" ? "CARD" :
+        row["Department"] === "Neurology" ? "NEU" :
+        row["Department"] === "ICU" ? "ICU" :
+        row["Department"] === "Urology" ? "URO" :
+        row["Department"] === "Emergency Medicine" ? "EMG" :
+        row["Department"] === "Surgery" ? "SURG" :
+        row["Department"] === "Diabetology" ? "DIAB" :
+        row["Department"],
         name: row["Department"],
 
         total: Number(row["Total Beds"]),
@@ -922,13 +929,13 @@ async function openDept(id){
    await loadICUPatients();
 }
   if(id === "DIAB"){
-    loadDiabetologyPatients();
+    await loadDiabetologyPatients();
 }
   if(id === "NEU"){
    await loadNeurologyPatients();
 }
   if(id === "CARD"){
-    loadCardiologyPatients();
+    await loadCardiologyPatients();
 }
   curDept=id;curPt=null;
   const d=DEPTS.find(x=>x.id===id);
